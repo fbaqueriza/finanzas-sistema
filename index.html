@@ -159,8 +159,18 @@ summary{cursor:pointer;font-weight:500}
   .pal{grid-template-columns:32px minmax(0,1fr);grid-template-areas:"n t" "bar bar" "spark v"}
   .pal-n{grid-area:n}.pal-t{grid-area:t}.pal-bar{grid-area:bar}.spark{grid-area:spark}.pal-v{grid-area:v}
 }
-.rec ol{margin:0;padding-left:20px;display:grid;gap:8px;color:var(--fg2);font-size:14px}
-.rec b{color:var(--fg)}
+.camino{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:6px}
+.step{display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px;align-items:start;padding:10px 12px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.step i{font-style:normal;font-family:var(--mono);font-size:13px;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--surface-2);color:var(--fg2)}
+.step>div{display:grid;gap:2px;min-width:0}
+.step b{font-weight:600}
+.step span{font-size:13px;color:var(--fg2)}
+.step em{font-style:normal;font-family:var(--mono);font-size:11px;color:var(--muted)}
+.step.hecho{opacity:.55}
+.step.hecho i{background:var(--good);color:#fff}
+.step.ahora{border-color:var(--accent);background:var(--accent-soft)}
+.step.ahora i{background:var(--accent);color:#fff}
+.step.ahora em{color:var(--accent-ink)}
 .muted{color:var(--muted);margin:0}
 .gloss{display:grid;gap:6px;margin-top:8px;max-width:70ch}
 .gloss p{margin:0;font-size:14px;color:var(--fg2)}
@@ -350,7 +360,7 @@ footer p{margin:4px 0}
 </section>
 
 <section class="tab" id="tab-diagnostico" hidden>
-  <div class="panel rec-panel"><h2>Recomendaciones</h2><div id="pal-rec" class="rec"></div></div>
+  <div class="panel rec-panel"><h2>Tu camino</h2><p class="note" id="camino-next"></p><ol class="camino" id="camino"></ol></div>
 
   <div class="sec-head"><h2>Qué palanca mueve más</h2><p>Cada fila es un movimiento concreto sobre tus números, simulado contra el escenario base. Barra y valor: diferencia de patrimonio real al final del horizonte. Curva: cómo responde el sistema mes a mes. Todo a la misma escala.</p></div>
   <div class="panel"><div class="pal-head"><span>Palanca</span><span>Movimiento</span><span>Efecto</span><span>Respuesta</span><span></span></div><div id="pal-rows"></div></div>
@@ -574,7 +584,7 @@ function compute(){
   $('t-stocks').textContent='neto '+M(sim[0].neto);
   $('t-sup').textContent=`${pct(S.params.inflacion||0)} infl. · ${sim.length-1} meses`;
   $('t-cats').textContent=`${S.grupos.length}`;
-  renderCatTotals(F);renderTiles(F,sim);renderDiagram(F,sim);renderChart(sim);renderTable(sim);const on=renderCards(F,sim);renderPalancas(F,sim);renderEstado(F,sim,on);
+  renderCatTotals(F);renderTiles(F,sim);renderDiagram(F,sim);renderChart(sim);renderTable(sim);const on=renderCards(F,sim);const sens=renderPalancas(F,sim);renderEstado(F,sim,on);renderCamino(F,sim,sens);
 }
 function renderTiles(F,sim){
   const liq=(S.stocks.pesos||0)+(S.stocks.usd||0)*(S.stocks.fx||0);
@@ -818,17 +828,76 @@ function renderPalancas(F,base){
     const pos=x.delta>=0;
     return `<div class="pal"><div class="pal-n">${x.palanca}</div><div class="pal-t"><b>${x.nombre}</b><span>${x.desc}</span><em>${x.forma}</em></div><div class="pal-bar"><i style="width:${(100*Math.abs(x.delta)/maxAbs).toFixed(1)}%;background:${pos?'var(--good)':'var(--crit)'}"></i></div>${spark(x.path)}<div class="pal-v ${pos?'pos':'neg'}">${pos?'+':'−'}${M(Math.abs(x.delta))}<small>patrimonio real en ${H} meses</small>${x.rojo!==rojoBase?`<small>meses en rojo: ${rojoBase} → ${x.rojo}</small>`:''}</div></div>`;
   }).join(''):`<p class="muted">Con los datos cargados no hay ninguna palanca simulable. Completá montos y stocks.</p>`;
-  // recomendaciones
-  const rec=[];
-  const top=list.filter(x=>x.delta>0).slice(0,3);
-  top.forEach((x,i)=>rec.push(`<li><b>${x.nombre}.</b> ${x.desc} Efecto: +${M(x.delta)} en ${H} meses. ${i===0?'Es la palanca que más mueve tu sistema hoy.':''}</li>`));
-  const def=list.find(x=>x.palanca===2);
-  if(def&&def.rojo<rojoBase)rec.push(`<li><b>${def.nombre}.</b> Cuesta ${M(Math.abs(def.delta))} de patrimonio pero baja los meses en rojo de ${rojoBase} a ${def.rojo}. Es la palanca de resiliencia, no de rendimiento.</li>`);
-  if(!p.meta||!p.meta.trim())rec.push(`<li><b>Ponele una meta.</b> No se puede simular, pero es la palanca 7 y ordena todas las anteriores: define cuánto colchón, cuánto invertir y para cuándo. Se carga en Datos, grupo Palancas.</li>`);
-  const pl=S.palancas, sinCosto=[!pl.verGastosDia&&'ver el gasto el mismo día',pl.revision==='nunca'&&'revisar el tablero una vez por mes',!pl.reglaCuotas&&'tarjeta solo para cuotas sin interés'].filter(Boolean);
-  if(sinCosto.length)rec.push(`<li><b>Palancas que no cuestan nada:</b> ${sinCosto.join(', ')}. No mueven el patrimonio en la simulación, pero son las que evitan que el sistema se desvíe sin que lo veas.</li>`);
-  if(F.faltan>0)rec.push(`<li><b>Completá los ${F.faltan} montos que faltan.</b> Sin eso, el ranking de arriba compara contra un gasto que no es el real.</li>`);
-  $('pal-rec').innerHTML=rec.length?`<ol>${rec.join('')}</ol>`:'<p class="muted">Nada que recomendar con lo cargado.</p>';
+  return {list,rojoBase,H};
+}
+
+/* camino: secuencia de pasos según el estado de las palancas */
+function renderCamino(F,sim,sens){
+  const pl=S.palancas,p=S.params,st=S.stocks,mv=Math.round(S.congreso.mesVenta||0);
+  const {list,H}=sens;
+  const ef=(palanca,pref)=>{const x=list.find(y=>y.palanca===palanca&&(!pref||y.nombre.startsWith(pref)));return x&&x.delta>0?`+${M(x.delta)} en ${H} meses`:'';};
+  const liq=(st.pesos||0)+(st.usd||0)*(st.fx||0);
+  const objC=pl.colchonMeses>0?pl.colchonMeses:3;
+  const deuda=st.deuda||0, pagoHoy=Math.min(deuda,liq), liqPost=liq-pagoHoy;
+  const colchonPost=F.gastos>0?liqPost/F.gastos:0;
+  const S_=[];
+  const step=(estado,palanca,titulo,detalle,efecto)=>S_.push({estado,palanca,titulo,detalle,efecto});
+
+  if(F.faltan>0)step('pendiente',5,`Completá los ${F.faltan} montos que faltan`,'Todo lo que sigue se calcula sobre un gasto incompleto. Es el primer paso porque corrige la información que alimenta al resto.');
+  else if(pl.revision==='nunca')step('pendiente',5,'Fijá una revisión mensual','Los montos están completos. Falta la frecuencia: una vez por mes, abrir esta página y ajustar lo que cambió.');
+  else step('hecho',5,'Información al día',`Montos completos y revisión ${pl.revision}.`);
+
+  if(deuda>0){
+    if(pagoHoy>=deuda)step('pendiente',6,`Pagá hoy los ${M(deuda)} de deuda`,`La liquidez lo cubre y te quedan ${M(liqPost)}. Cada mes que esperás cuesta ${M(deuda*(st.deudaTasa||0)/100)} de interés.`);
+    else step('pendiente',6,`Pagá ${M(pagoHoy)} hoy y el resto con el sobrante`,F.balance>0?`Quedan ${M(deuda-pagoHoy)}; al ritmo del sobrante actual se cancelan en ${Math.ceil((deuda-pagoHoy)/F.balance)} meses. Nada va a inversión hasta entonces.`:'El flujo es negativo: sin recortar gastos la deuda no baja.');
+  }else step('hecho',6,'Sin deuda','El bucle vicioso de la tarjeta está apagado.');
+
+  if(F.gastos>0){
+    if(colchonPost<objC){
+      const falta=(objC-colchonPost)*F.gastos;
+      step('pendiente',2,`Llevá el colchón a ${objC} meses`,`Después de la deuda te quedan ${nf1.format(colchonPost)} meses de gasto. Faltan ${M(falta)}${F.balance>0?`, unos ${Math.ceil(falta/F.balance)} meses de sobrante`:''}. Hasta entonces el sobrante va acá, no a inversión.`);
+    }else step('hecho',2,`Colchón en objetivo (${objC} meses)`,`Tenés ${nf1.format(colchonPost)} meses de gasto líquidos${deuda>0?' después de pagar la deuda':''}.`);
+  }
+
+  const faltanReglas=[!pl.reglaDebito&&'lo variable con débito',!pl.reglaCuotas&&'tarjeta solo para cuotas sin interés',p.pagarDeuda===false&&'la deuda se paga con liquidez'].filter(Boolean);
+  if(faltanReglas.length)step('pendiente',6,'Fijá las reglas que faltan',`${faltanReglas.join('; ')}. Se deciden una vez y después no exigen voluntad. Son las que impiden volver al paso de la deuda.`);
+  else step('hecho',6,'Reglas fijadas','Débito para lo variable, cuotas sin interés, deuda con liquidez.');
+
+  if(F.balance>0&&(p.ahorroAuto||0)===0)step('pendiente',3,'Programá el ahorro automático',`Una transferencia a inversión el día que cobrás, con un porcentaje del sobrante. Hoy ${M(F.balance)} quedan cada mes en pesos a merced de la inflación.`,ef(3,'Ahorro'));
+  else if((p.ahorroAuto||0)>0)step('hecho',3,`Ahorro automático al ${pct(p.ahorroAuto)}`,'El sobrante se invierte sin decidirlo cada mes.');
+
+  const exceso=(st.pesos||0)-objC*F.gastos;
+  if(exceso>0&&F.gastos>0)step('pendiente',3,`Mové ${M(exceso)} de pesos a dólares o inversión`,`Es lo que excede ${objC} meses de gasto. En pesos pierde ${M(exceso*(p.inflacion||0)/100)} por mes.`,ef(3,'Mover'));
+
+  if(F.congreso>0&&mv===0)step('pendiente',4,'Ponele fecha a la venta de Congreso',`Sin fecha, el drenaje de ${M(F.congreso)} por mes es permanente. Una fecha, aunque implique bajar el precio, convierte el retardo en un escalón.`,ef(4,'Vender'));
+  else if(F.congreso>0&&mv>6)step('pendiente',4,`Acortá la venta de Congreso (mes ${mv})`,`Cada mes antes ahorra ${M(F.congreso)}.`,ef(4,'Vender'));
+  else if(F.congreso>0)step('hecho',4,`Congreso con fecha (mes ${mv})`,'El drenaje tiene fin.');
+  if(!pl.verGastosDia)step('pendiente',4,'Mirá el gasto el mismo día','Débito o app del banco en vez del resumen. Es la palanca más barata de todas y la que más acorta el retardo del bucle de balance.');
+  if(p.inflacion>0){
+    const infA=Math.pow(1+p.inflacion/100,12)-1, ajA=p.cadaMeses>0?Math.pow(1+(p.ajuste||0)/100,12/p.cadaMeses)-1:0;
+    if(ajA<infA-0.01)step('pendiente',4,'Indexá los retiros a la inflación',`Hoy crecen ${pct(100*ajA)} anual contra ${pct(100*infA)} de inflación. Ajustarlos más seguido, aunque sea en cuotas chicas, cierra la brecha.`,ef(4,'Indexar'));
+    else step('hecho',4,'Ingresos al ritmo de la inflación','El retardo del ajuste está cubierto.');
+  }
+
+  if(!p.meta||!p.meta.trim())step('pendiente',7,'Definí para qué ahorrás','Sin meta, el colchón y la inversión no tienen referencia. Una frase alcanza para empezar.');
+  else if(!(pl.metaMonto>0))step('pendiente',7,`Ponele monto y plazo a "${esc(p.meta.trim())}"`,'Con un monto en pesos de hoy y un plazo, la simulación te dice si llegás.');
+  else{
+    const hit=sim.findIndex(r=>r.neto-sim[0].neto>=pl.metaMonto);
+    if(hit<0)step('pendiente',7,`"${esc(p.meta.trim())}" no llega en ${H} meses`,`Para ${M(pl.metaMonto)} hace falta mover una palanca de arriba o estirar el plazo.`);
+    else if(pl.metaMeses>0&&hit>pl.metaMeses)step('pendiente',7,`"${esc(p.meta.trim())}" llega en el mes ${hit}, no en el ${pl.metaMeses}`,'La tabla de sensibilidad de abajo muestra cuál palanca acorta más la brecha.');
+    else step('hecho',7,`"${esc(p.meta.trim())}" llega en el mes ${hit}`,pl.metaMeses>0?`Antes del plazo de ${pl.metaMeses} meses.`:'Dentro del horizonte.');
+  }
+
+  if(!pl.paradigma||!pl.paradigma.trim())step('pendiente',8,'Escribí qué es la plata para vos','Es la palanca más fuerte y la única que no se simula. Decide qué meta vale la pena y cuánto colchón te deja dormir.');
+  else step('hecho',8,'Paradigma',esc(pl.paradigma.trim()));
+
+  if(pl.tope>0&&F.variable>pl.tope)step('pendiente',1,`Bajá lo variable al tope de ${M(pl.tope)}`,`Hoy está en ${M(F.variable)}. Es la palanca más débil: recién tiene sentido cuando las anteriores están en marcha.`,ef(1,'Recortar 10'));
+
+  const pend=S_.filter(x=>x.estado==='pendiente');
+  const first=pend[0];
+  $('camino-next').textContent=first?`Próximo paso: ${first.titulo}. ${pend.length-1} más por delante, ${S_.length-pend.length} hechos.`:'Todas las palancas están en marcha. Ahora es revisión mensual.';
+  let n=0;
+  $('camino').innerHTML=S_.map(x=>{const now=x===first;const num=x.estado==='pendiente'?++n:'✓';return `<li class="step ${x.estado}${now?' ahora':''}"><i>${num}</i><div><b>${x.titulo}</b><span>${x.detalle}</span><em>${x.efecto?x.efecto+' · ':''}palanca ${x.palanca}</em></div></li>`;}).join('');
 }
 
 /* ---------- tipo de cambio ---------- */
