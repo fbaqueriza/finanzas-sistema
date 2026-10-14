@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Finanzas como sistema</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%230f6e8c%22%2F%3E%3Crect%20x%3D%225%22%20y%3D%2211%22%20width%3D%2212%22%20height%3D%2210%22%20rx%3D%221.5%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%222.2%22%2F%3E%3Cpath%20d%3D%22M17%2016h9m-3.5-3.5L26%2016l-3.5%203.5%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%222.2%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 </head>
@@ -33,7 +34,26 @@
 }
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5}
-.page{max-width:1040px;margin:0 auto;padding-inline:16px;padding-block:28px 64px;display:grid;gap:36px}
+.page{max-width:1040px;margin:0 auto;padding-inline:16px;padding-block:28px 64px;display:grid;gap:22px}
+.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;gap:4px;align-items:center;background:var(--bg);border-bottom:1px solid var(--line);padding:6px 0;flex-wrap:wrap}
+.tabs [role=tab]{border:none;background:none;padding:8px 14px;border-radius:4px;font-weight:500;color:var(--fg2);font-size:15px}
+.tabs [role=tab]:hover{background:var(--surface-2)}
+.tabs [role=tab][aria-selected="true"]{background:var(--accent-soft);color:var(--accent-ink)}
+.tabs .status{margin-left:auto}
+.tab{display:grid;gap:14px}
+.note,.hint-p{margin:0;color:var(--muted);font-size:13px;max-width:72ch}
+.grp{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:0}
+.grp>summary{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:12px 16px;cursor:pointer;font-family:var(--display);font-weight:700;font-size:17px;list-style:none}
+.grp>summary::-webkit-details-marker{display:none}
+.grp>summary::before{content:"▸";font-family:var(--mono);color:var(--muted);margin-right:8px;font-size:12px}
+.grp[open]>summary::before{content:"▾"}
+.grp>summary span{flex:1;min-width:0}
+.grp>summary small{font-family:var(--mono);font-weight:400;font-size:12px;color:var(--muted);margin-left:8px;letter-spacing:.04em}
+.grp>summary b{font-family:var(--mono);font-weight:500;font-size:13px;color:var(--fg2);white-space:nowrap}
+.grp-body{padding:4px 16px 16px;border-top:1px solid var(--line)}
+.grp-body.fields{padding-top:14px}
+.grp-body.grid2{padding-top:14px}
+.rec-panel h2{margin-bottom:10px}
 header h1{font-family:var(--display);font-weight:700;font-size:clamp(28px,4.5vw,40px);line-height:1.05;margin:4px 0 10px;letter-spacing:-.01em;text-wrap:balance}
 .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-ink);margin:0}
 .lede{max-width:62ch;color:var(--fg2);margin:0 0 8px}
@@ -107,6 +127,30 @@ button.del:hover{color:var(--crit)}
 details{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:10px 14px}
 summary{cursor:pointer;font-weight:500}
 .tbl{overflow-x:auto;margin-top:8px}
+.pal-head,.pal{display:grid;grid-template-columns:32px minmax(0,2fr) minmax(90px,1fr) 120px minmax(120px,.9fr);gap:12px;align-items:center}
+.pal-head{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding-bottom:8px;border-bottom:1px solid var(--line)}
+.pal{padding:12px 0;border-bottom:1px solid var(--line)}
+.pal:last-child{border-bottom:none}
+.pal-n{font-family:var(--mono);font-size:13px;color:var(--accent-ink);background:var(--accent-soft);width:28px;height:28px;border-radius:50%;display:grid;place-items:center}
+.pal-t{display:grid;gap:2px;min-width:0}
+.pal-t b{font-weight:600}
+.pal-t span{font-size:13px;color:var(--fg2)}
+.pal-t em{font-style:normal;font-family:var(--mono);font-size:11px;color:var(--muted)}
+.pal-bar{height:10px;background:var(--surface-2);border-radius:2px;overflow:hidden}
+.pal-bar i{display:block;height:100%;border-radius:2px}
+.spark{width:120px;height:36px;display:block}
+.pal-v{font-family:var(--mono);font-size:16px;font-weight:500;display:grid;gap:1px;text-align:right}
+.pal-v small{font-size:11px;font-weight:400;color:var(--muted)}
+.pal-v.pos{color:var(--good)}.pal-v.neg{color:var(--crit)}
+.pal-v.pos small,.pal-v.neg small{color:var(--muted)}
+@media (max-width:760px){
+  .pal-head{display:none}
+  .pal{grid-template-columns:32px minmax(0,1fr);grid-template-areas:"n t" "bar bar" "spark v"}
+  .pal-n{grid-area:n}.pal-t{grid-area:t}.pal-bar{grid-area:bar}.spark{grid-area:spark}.pal-v{grid-area:v}
+}
+.rec ol{margin:0;padding-left:20px;display:grid;gap:8px;color:var(--fg2);font-size:14px}
+.rec b{color:var(--fg)}
+.muted{color:var(--muted);margin:0}
 .gloss{display:grid;gap:6px;margin-top:8px;max-width:70ch}
 .gloss p{margin:0;font-size:14px;color:var(--fg2)}
 .gloss b{color:var(--fg)}
@@ -129,119 +173,122 @@ footer p{margin:4px 0}
 <header>
   <p class="eyebrow">Pensamiento sistémico · Donella Meadows</p>
   <h1>Finanzas como sistema</h1>
-  <p class="lede">Cargá ingresos, gastos y stocks. La página calcula tus flujos, simula los stocks mes a mes con inflación y lee el sistema: bucles, retardos, palancas y trampas. Todo en pesos de hoy.</p>
-  <p class="status" id="status">Cargando…</p>
+  <p class="lede">Stocks, flujos y bucles de tu plata, simulados con inflación y leídos como un sistema.</p>
 </header>
 
-<section id="sec-inputs">
-  <div class="sec-head"><h2>Entradas <small>flujos y stocks</small></h2><p>Los montos son mensuales. Dejá en blanco lo que no sepas todavía; se marca en amarillo y el modelo lo toma como cero.</p></div>
-  <div class="grid2">
-    <div class="panel">
-      <h2>Ingresos <small>flujo de entrada</small></h2>
-      <p style="margin:0 0 8px;color:var(--fg2);font-size:14px">Si el ingreso es un retiro del negocio u otro flujo variable, cargá el típico y el de un mes malo.</p>
+<nav class="tabs" role="tablist" aria-label="Secciones">
+  <button role="tab" data-tab="datos" aria-selected="true">Datos</button>
+  <button role="tab" data-tab="sistema" aria-selected="false">Sistema</button>
+  <button role="tab" data-tab="diagnostico" aria-selected="false">Diagnóstico</button>
+  <span class="status" id="status">Cargando…</span>
+</nav>
+
+<section class="tab" id="tab-datos">
+  <p class="note">Montos mensuales en pesos. Lo que dejes en blanco queda en amarillo y cuenta como cero.</p>
+
+  <details class="grp" open>
+    <summary><span>Ingresos</span><b id="t-ing"></b></summary>
+    <div class="grp-body">
       <div class="row ing row-head"><span>Fuente</span><span>Típico $ / mes</span><span>Mes malo $</span><span></span></div>
       <div class="rows" id="ingresos"></div>
       <button class="add" data-add="ingresos">+ agregar ingreso</button>
-      <div class="subtotal"><span>Total ingresos</span><b id="t-ing"></b></div>
+      <p class="hint-p">Si es un retiro del negocio, cargá también lo que retirás en un mes flojo.</p>
     </div>
-    <div class="panel">
-      <h2>Stocks hoy <small>lo acumulado</small></h2>
-      <div class="fields">
-        <div class="field"><label for="st-pesos">Pesos líquidos</label><input type="number" id="st-pesos" data-path="stocks.pesos" step="10000" placeholder="0"><span class="hint">cuenta, efectivo, billetera</span></div>
-        <div class="field"><label for="st-usd">Dólares (USD)</label><input type="number" id="st-usd" data-path="stocks.usd" step="100" placeholder="0"><span class="hint">billete o cuenta</span></div>
-        <div class="field"><label for="st-fxTipo">Dólar de referencia</label><select id="st-fxTipo" data-path="stocks.fxTipo"><option value="oficial">Oficial (venta)</option><option value="bolsa">MEP (venta)</option><option value="blue">Blue (venta)</option><option value="manual">Manual</option></select><span class="hint">se actualiza al abrir desde dolarapi.com</span></div>
-        <div class="field"><label for="st-fx">Tipo de cambio ($ por USD)</label><input type="number" id="st-fx" data-path="stocks.fx" step="10" placeholder="0"><span class="hint" id="fx-hint"></span></div>
-        <div class="field"><label for="st-inv">Inversiones ($)</label><input type="number" id="st-inv" data-path="stocks.inv" step="10000" placeholder="0"><span class="hint">plazo fijo, FCI, cedears</span></div>
-        <div class="field"><label for="st-invTasa">Rendimiento inversión (% mensual)</label><input type="number" id="st-invTasa" data-path="stocks.invTasa" step="0.1"></div>
-        <div class="field"><label for="st-deuda">Deuda de tarjeta ($)</label><input type="number" id="st-deuda" data-path="stocks.deuda" step="10000" placeholder="0"><span class="hint">saldo financiado, no el resumen</span></div>
-        <div class="field"><label for="st-deudaTasa">Interés deuda (% mensual)</label><input type="number" id="st-deudaTasa" data-path="stocks.deudaTasa" step="0.1"></div>
-      </div>
-    </div>
-  </div>
-  <div class="grid2">
-    <div class="panel">
-      <h2>Gastos fijos <small>salen igual todos los meses</small></h2>
-      <div class="row row-head"><span>Concepto</span><span>$ / mes</span><span>Grupo</span><span></span></div>
+  </details>
+
+  <details class="grp" open>
+    <summary><span>Gastos fijos</span><b id="t-fijo"></b></summary>
+    <div class="grp-body">
+      <div class="row row-head"><span>Concepto</span><span>$ / mes</span><span>Categoría</span><span></span></div>
       <div class="rows" id="gastos-fijo"></div>
       <button class="add" data-add="gastos" data-tipo="fijo">+ agregar gasto fijo</button>
-      <div class="subtotal"><span>Total fijos</span><b id="t-fijo"></b></div>
     </div>
-    <div class="panel">
-      <h2>Gastos variables <small>promedio mensual</small></h2>
-      <div class="row row-head"><span>Concepto</span><span>$ / mes</span><span>Grupo</span><span></span></div>
+  </details>
+
+  <details class="grp" open>
+    <summary><span>Gastos variables <small>promedio mensual</small></span><b id="t-var"></b></summary>
+    <div class="grp-body">
+      <div class="row row-head"><span>Concepto</span><span>$ / mes</span><span>Categoría</span><span></span></div>
       <div class="rows" id="gastos-variable"></div>
       <button class="add" data-add="gastos" data-tipo="variable">+ agregar gasto variable</button>
-      <div class="subtotal"><span>Total variables</span><b id="t-var"></b></div>
     </div>
-  </div>
-  <div class="grid2">
-    <div class="panel">
-      <h2>Supuestos del sistema <small>podés cambiarlos</small></h2>
-      <div class="fields">
-        <div class="field"><label for="p-inflacion">Inflación (% mensual)</label><input type="number" id="p-inflacion" data-path="params.inflacion" step="0.1"><span class="hint">INDEC sep-2026: 1,9 % nacional, 2,0 % GBA · los gastos la siguen al 100 %</span></div>
-        <div class="field"><label for="p-horizonte">Horizonte (meses)</label><input type="number" id="p-horizonte" data-path="params.horizonte" step="1" min="3" max="120"></div>
-        <div class="field"><label for="p-ajuste">Ajuste de ingresos (%)</label><input type="number" id="p-ajuste" data-path="params.ajuste" step="1"></div>
-        <div class="field"><label for="p-cadaMeses">…cada cuántos meses</label><input type="number" id="p-cadaMeses" data-path="params.cadaMeses" step="1" min="0"><span class="hint">0 = sin ajuste</span></div>
-        <div class="field"><label for="p-mesesMalos">Meses malos por año</label><input type="number" id="p-mesesMalos" data-path="params.mesesMalos" step="1" min="0" max="12"><span class="hint">la simulación usa el ingreso de mes malo esos meses</span></div>
-        <div class="field"><label for="p-ahorroAuto">Ahorro automático (% del sobrante)</label><input type="number" id="p-ahorroAuto" data-path="params.ahorroAuto" step="5" min="0" max="100"><span class="hint">lo que va a inversiones sin decidirlo cada mes</span></div>
-        <div class="field"><label for="p-meta">¿Para qué ahorrás?</label><input type="text" id="p-meta" data-path="params.meta" placeholder="una meta concreta"></div>
-        <div class="field"><label class="check"><input type="checkbox" id="p-pagarDeuda" data-path="params.pagarDeuda"> Pagar la deuda con la liquidez disponible</label><span class="hint">si está apagado, la deuda solo se paga con el sobrante del mes</span></div>
-      </div>
+  </details>
+
+  <details class="grp" open>
+    <summary><span>Stocks hoy</span><b id="t-stocks"></b></summary>
+    <div class="grp-body fields">
+      <div class="field"><label for="st-pesos">Pesos líquidos</label><input type="number" id="st-pesos" data-path="stocks.pesos" step="10000" placeholder="0"><span class="hint">cuenta, efectivo, billetera</span></div>
+      <div class="field"><label for="st-usd">Dólares (USD)</label><input type="number" id="st-usd" data-path="stocks.usd" step="100" placeholder="0"></div>
+      <div class="field"><label for="st-fxTipo">Dólar de referencia</label><select id="st-fxTipo" data-path="stocks.fxTipo"><option value="oficial">Oficial (venta)</option><option value="bolsa">MEP (venta)</option><option value="blue">Blue (venta)</option><option value="manual">Manual</option></select></div>
+      <div class="field"><label for="st-fx">Tipo de cambio ($ por USD)</label><input type="number" id="st-fx" data-path="stocks.fx" step="10" placeholder="0"><span class="hint" id="fx-hint"></span></div>
+      <div class="field"><label for="st-inv">Inversiones ($)</label><input type="number" id="st-inv" data-path="stocks.inv" step="10000" placeholder="0"><span class="hint">plazo fijo, FCI, cedears</span></div>
+      <div class="field"><label for="st-invTasa">Rendimiento (% mensual)</label><input type="number" id="st-invTasa" data-path="stocks.invTasa" step="0.1"></div>
+      <div class="field"><label for="st-deuda">Deuda de tarjeta ($)</label><input type="number" id="st-deuda" data-path="stocks.deuda" step="10000" placeholder="0"><span class="hint">saldo financiado, no el resumen</span></div>
+      <div class="field"><label for="st-deudaTasa">Interés deuda (% mensual)</label><input type="number" id="st-deudaTasa" data-path="stocks.deudaTasa" step="0.1"></div>
     </div>
-    <div class="panel">
-      <h2>Depto Congreso <small>stock en venta</small></h2>
-      <p style="margin:0 0 10px;color:var(--fg2);font-size:14px">Mientras no se vende es un stock que drena flujo: expensas, ABL y servicios. Al venderse, esos gastos desaparecen y entra el valor en dólares.</p>
+  </details>
+
+  <details class="grp">
+    <summary><span>Depto Congreso <small>stock en venta</small></span><b id="t-congreso"></b></summary>
+    <div class="grp-body">
+      <p class="hint-p">Mientras no se vende drena expensas, ABL y servicios. Al venderse, esos gastos desaparecen y entra el valor en dólares.</p>
       <div class="fields">
         <div class="field"><label for="c-valorUsd">Valor de venta estimado (USD)</label><input type="number" id="c-valorUsd" data-path="congreso.valorUsd" step="1000" placeholder="0"></div>
-        <div class="field"><label for="c-mesVenta">Mes estimado de venta</label><input type="number" id="c-mesVenta" data-path="congreso.mesVenta" step="1" min="0"><span class="hint">0 = sin fecha (no se vende en el horizonte)</span></div>
+        <div class="field"><label for="c-mesVenta">Mes estimado de venta</label><input type="number" id="c-mesVenta" data-path="congreso.mesVenta" step="1" min="0"><span class="hint">0 = sin fecha</span></div>
         <div class="field"><label for="c-grupo">Categoría que drena el depto</label><select id="c-grupo" data-path="congreso.grupo"></select><span class="hint">esos gastos se cortan al vender</span></div>
       </div>
-      <div class="subtotal"><span>Drenaje mensual del depto</span><b id="t-congreso"></b></div>
     </div>
-  </div>
-  <div class="panel">
-    <h2>Categorías <small>agrupan los gastos</small></h2>
-    <div class="grid2">
+  </details>
+
+  <details class="grp">
+    <summary><span>Supuestos</span><b id="t-sup"></b></summary>
+    <div class="grp-body fields">
+      <div class="field"><label for="p-inflacion">Inflación (% mensual)</label><input type="number" id="p-inflacion" data-path="params.inflacion" step="0.1"><span class="hint">INDEC sep-2026: 1,9 % nacional, 2,0 % GBA</span></div>
+      <div class="field"><label for="p-horizonte">Horizonte (meses)</label><input type="number" id="p-horizonte" data-path="params.horizonte" step="1" min="3" max="120"></div>
+      <div class="field"><label for="p-ajuste">Ajuste de ingresos (%)</label><input type="number" id="p-ajuste" data-path="params.ajuste" step="1"></div>
+      <div class="field"><label for="p-cadaMeses">…cada cuántos meses</label><input type="number" id="p-cadaMeses" data-path="params.cadaMeses" step="1" min="0"><span class="hint">0 = sin ajuste</span></div>
+      <div class="field"><label for="p-mesesMalos">Meses malos por año</label><input type="number" id="p-mesesMalos" data-path="params.mesesMalos" step="1" min="0" max="12"><span class="hint">usan el ingreso de mes malo</span></div>
+      <div class="field"><label for="p-ahorroAuto">Ahorro automático (% del sobrante)</label><input type="number" id="p-ahorroAuto" data-path="params.ahorroAuto" step="5" min="0" max="100"><span class="hint">va a inversión sin decidirlo cada mes</span></div>
+      <div class="field"><label for="p-meta">¿Para qué ahorrás?</label><input type="text" id="p-meta" data-path="params.meta" placeholder="una meta concreta"></div>
+      <div class="field"><label class="check"><input type="checkbox" id="p-pagarDeuda" data-path="params.pagarDeuda"> Pagar la deuda con la liquidez disponible</label><span class="hint">apagado: solo se paga con el sobrante del mes</span></div>
+    </div>
+  </details>
+
+  <details class="grp">
+    <summary><span>Categorías</span><b id="t-cats"></b></summary>
+    <div class="grp-body grid2">
       <div>
-        <p style="margin:0 0 8px;color:var(--fg2);font-size:14px">Renombrá, agregá o quitá. Al quitar una, sus gastos pasan a "otro".</p>
         <div class="rows" id="cats"></div>
         <button class="add" data-addcat>+ agregar categoría</button>
+        <p class="hint-p">Al quitar una, sus gastos pasan a "otro".</p>
       </div>
       <div class="tbl" id="cat-tot"></div>
     </div>
-  </div>
+  </details>
 </section>
 
-<section id="sec-resumen">
-  <div class="sec-head"><h2>Flujo del mes <small>mes 0, pesos de hoy</small></h2></div>
+<section class="tab" id="tab-sistema" hidden>
   <div class="tiles" id="tiles"></div>
-</section>
 
-<section id="sec-diagrama">
-  <div class="sec-head"><h2>Mapa de stocks y flujos</h2><p>Cajas sólidas son stocks (se acumulan). Cajas punteadas son fuentes o sumideros fuera del sistema. Las flechas son flujos mensuales; el rojo es el drenaje invisible de la inflación sobre los pesos.</p></div>
+  <div class="sec-head"><h2>Mapa de stocks y flujos</h2><p>Cajas sólidas son stocks. Punteadas, fuentes o sumideros. Flechas, flujos mensuales. En rojo, la fuga de la inflación.</p></div>
   <div class="panel diagram">
     <svg viewBox="0 0 780 360" role="img" aria-label="Mapa de stocks y flujos de las finanzas personales">
       <defs>
         <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--accent)"/></marker>
         <marker id="ahr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--crit)"/></marker>
       </defs>
-      <!-- external: ingresos -->
       <rect class="ext" x="20" y="150" width="140" height="64" rx="4"/>
       <text x="90" y="176" text-anchor="middle" class="title">Ingresos</text>
       <text x="90" y="196" text-anchor="middle" class="val" id="d-ing"></text>
-      <!-- stock: pesos -->
       <rect class="stock" x="300" y="140" width="190" height="84" rx="3"/>
       <text x="395" y="168" text-anchor="middle" class="title">Pesos líquidos</text>
       <text x="395" y="190" text-anchor="middle" class="val" id="d-pesos"></text>
       <text x="395" y="208" text-anchor="middle" class="lab" id="d-colchon"></text>
-      <!-- external: gastos -->
       <rect class="ext" x="620" y="150" width="140" height="64" rx="4"/>
       <text x="690" y="176" text-anchor="middle" class="title">Gastos</text>
       <text x="690" y="196" text-anchor="middle" class="val" id="d-gas"></text>
-      <!-- flows ingresos → pesos → gastos -->
       <line class="flow" x1="160" y1="182" x2="298" y2="182" id="f-ing"/>
       <line class="flow" x1="490" y1="182" x2="618" y2="182" id="f-gas"/>
-      <!-- stock: inversiones -->
       <rect class="stock" x="300" y="280" width="190" height="60" rx="3"/>
       <text x="395" y="304" text-anchor="middle" class="title">Inversiones</text>
       <text x="395" y="324" text-anchor="middle" class="val" id="d-inv"></text>
@@ -249,13 +296,11 @@ footer p{margin:4px 0}
       <text x="368" y="256" class="lab" id="l-ah"></text>
       <path class="flow" d="M430 278 L430 226" id="f-rend"/>
       <text x="438" y="256" class="lab" id="l-rend"></text>
-      <!-- stock: deuda -->
       <rect class="stock" x="620" y="280" width="140" height="60" rx="3"/>
       <text x="690" y="304" text-anchor="middle" class="title">Deuda tarjeta</text>
       <text x="690" y="324" text-anchor="middle" class="val" id="d-deu"></text>
       <path class="flow" d="M490 210 L618 300" id="f-deu"/>
       <text x="520" y="274" class="lab" id="l-deu"></text>
-      <!-- stock: congreso + usd -->
       <rect class="stock" x="300" y="20" width="190" height="60" rx="3"/>
       <text x="395" y="44" text-anchor="middle" class="title">Depto Congreso</text>
       <text x="395" y="64" text-anchor="middle" class="val" id="d-con"></text>
@@ -266,29 +311,34 @@ footer p{margin:4px 0}
       <text x="230" y="42" text-anchor="middle" class="lab" id="l-venta"></text>
       <path class="flow" d="M490 50 L690 50 L690 148" id="f-con"/>
       <text x="560" y="42" class="lab" id="l-con"></text>
-      <!-- inflation leak -->
       <path class="leak" d="M300 200 L220 260"/>
       <text x="150" y="276" class="lab" id="l-inf" style="fill:var(--crit)"></text>
       <text x="150" y="292" class="lab" id="l-inf2" style="fill:var(--crit)"></text>
     </svg>
   </div>
-</section>
 
-<section id="sec-sim">
-  <div class="sec-head"><h2>Simulación de stocks <small>pesos constantes</small></h2><p id="sim-lede"></p></div>
+  <div class="sec-head"><h2>Simulación <small>pesos de hoy</small></h2><p id="sim-lede"></p></div>
   <div class="chart-wrap">
     <div class="legend" id="legend"></div>
     <div id="chart"></div>
     <div class="tip" id="tip"></div>
   </div>
-  <details><summary>Ver la tabla mes a mes</summary><div class="tbl" id="tbl"></div></details>
+  <details><summary>Tabla mes a mes</summary><div class="tbl" id="tbl"></div></details>
+  <p class="note">Cada mes los gastos suben con la inflación y los ingresos se ajustan en escalones. Si sobra: primero deuda, después el ahorro automático a inversión, el resto queda en pesos. Si falta: pesos, luego inversiones, luego tarjeta. El dólar se asume constante en términos reales.</p>
 </section>
 
-<section id="sec-lectura">
-  <div class="sec-head"><h2>Lectura sistémica</h2><p>Lo que el modelo ve en tus números, en el lenguaje de Meadows: qué bucle domina, dónde hay retardos, qué trampa acecha y en qué palanca conviene operar.</p></div>
+<section class="tab" id="tab-diagnostico" hidden>
+  <div class="panel rec-panel"><h2>Recomendaciones</h2><div id="pal-rec" class="rec"></div></div>
+
+  <div class="sec-head"><h2>Qué palanca mueve más</h2><p>Cada fila es un movimiento concreto sobre tus números, simulado contra el escenario base. Barra y valor: diferencia de patrimonio real al final del horizonte. Curva: cómo responde el sistema mes a mes. Todo a la misma escala.</p></div>
+  <div class="panel"><div class="pal-head"><span>Palanca</span><span>Movimiento</span><span>Efecto</span><span>Respuesta</span><span></span></div><div id="pal-rows"></div></div>
+
+  <div class="sec-head"><h2>Alertas</h2><p>Lo que el modelo ve en tus números, en el lenguaje de Meadows.</p></div>
   <div class="cards" id="cards"></div>
-  <div class="panel">
-    <h3>Las palancas, de la más débil a la más fuerte</h3>
+  <details><summary>Lo que está bien <span id="ok-count"></span></summary><div class="cards" id="cards-ok" style="margin-top:10px"></div></details>
+
+  <details>
+    <summary>Las ocho palancas, de la más débil a la más fuerte</summary>
     <ol class="palancas" id="palancas">
       <li data-p="1"><span><b>Parámetros.</b> Recortar un gasto puntual. Lo más común y lo menos efectivo.</span></li>
       <li data-p="2"><span><b>Buffers.</b> Fondo de emergencia. Amortigua shocks y evita caer en deuda.</span></li>
@@ -299,24 +349,20 @@ footer p{margin:4px 0}
       <li data-p="7"><span><b>Metas.</b> Para qué ahorrás. Sin meta el bucle de balance no tiene referencia.</span></li>
       <li data-p="8"><span><b>Paradigma.</b> Tu relación con el dinero. La más fuerte y la más difícil.</span></li>
     </ol>
-  </div>
+  </details>
   <details>
-    <summary>Glosario: cómo usa Meadows estas palabras</summary>
+    <summary>Glosario</summary>
     <div class="gloss">
       <p><b>Stock.</b> Lo que se acumula y podés medir en un instante: pesos en la cuenta, dólares, deuda, el depto.</p>
       <p><b>Flujo.</b> Lo que cambia un stock por unidad de tiempo: ingresos, gastos, intereses, la inflación sobre los pesos.</p>
-      <p><b>Bucle de refuerzo (positivo).</b> Un flujo que crece con el stock que alimenta. Positivo no quiere decir bueno: el interés compuesto de una inversión es un bucle de refuerzo virtuoso, el interés de la tarjeta es uno vicioso. Ambos se aceleran solos.</p>
+      <p><b>Bucle de refuerzo (positivo).</b> Un flujo que crece con el stock que alimenta. Positivo no quiere decir bueno: el interés compuesto de una inversión es virtuoso, el de la tarjeta es vicioso. Ambos se aceleran solos.</p>
       <p><b>Bucle de balance (negativo).</b> Un flujo que empuja el stock hacia una meta: gastar menos cuando el saldo baja, ahorrar hasta llegar al colchón. Negativo no quiere decir malo: es el que estabiliza.</p>
-      <p><b>Retardo.</b> Tiempo entre la causa y el efecto. El resumen de la tarjeta llega 40 días después del gasto; el ajuste de ingreso llega meses después de la inflación. Los retardos hacen que el bucle de balance corrija tarde y de más.</p>
-      <p><b>Palanca.</b> Un lugar del sistema donde un cambio chico produce un cambio grande. Meadows ordena doce; acá usamos ocho.</p>
+      <p><b>Retardo.</b> Tiempo entre causa y efecto. El resumen llega 40 días después del gasto; el ajuste de ingreso llega meses después de la inflación. Los retardos hacen que el bucle de balance corrija tarde y de más.</p>
+      <p><b>Palanca.</b> Un lugar del sistema donde un cambio chico produce un cambio grande.</p>
       <p><b>Trampa.</b> Una estructura que produce un mal resultado aunque cada decisión parezca razonable: desplazar la carga, deriva hacia bajo desempeño, escalada.</p>
     </div>
   </details>
 </section>
-
-<footer>
-  <p><b>Cómo simula.</b> Cada mes los gastos suben con la inflación; los ingresos se ajustan en escalones según lo que cargues. Si sobra, primero se paga deuda, luego va a inversiones el porcentaje automático y el resto queda en pesos. Si falta, se usan pesos, después inversiones, y lo que no alcanza va a la tarjeta con interés. El dólar se asume constante en términos reales. Todo se muestra en pesos de hoy, así la inflación aparece como lo que es: una pérdida de stock.</p>
-</footer>
 </main>
 
 <script>
@@ -466,19 +512,19 @@ document.addEventListener('click',e=>{
 });
 
 /* ---------- model ---------- */
-function flujos(){
-  const ing=sum(S.ingresos.map(i=>i.monto));
-  const ingMin=sum(S.ingresos.map(i=>i.minimo!=null?i.minimo:i.monto));
-  const g=S.gastos;
+function flujos(Sx=S){
+  const ing=sum(Sx.ingresos.map(i=>i.monto));
+  const ingMin=sum(Sx.ingresos.map(i=>i.minimo!=null?i.minimo:i.monto));
+  const g=Sx.gastos;
   const fijo=sum(g.filter(x=>x.tipo==='fijo').map(x=>x.monto));
   const variable=sum(g.filter(x=>x.tipo==='variable').map(x=>x.monto));
   const porGrupo={};for(const x of g)porGrupo[x.grupo]=(porGrupo[x.grupo]||0)+(x.monto||0);
   const gastos=fijo+variable;
   const faltan=g.filter(x=>x.monto==null).length;
-  return {ing,ingMin,fijo,variable,gastos,porGrupo,faltan,balance:ing-gastos,balanceMin:ingMin-gastos,congreso:porGrupo[S.congreso.grupo]||0,vivienda:porGrupo.vivienda||0};
+  return {ing,ingMin,fijo,variable,gastos,porGrupo,faltan,balance:ing-gastos,balanceMin:ingMin-gastos,congreso:porGrupo[Sx.congreso.grupo]||0,vivienda:porGrupo.vivienda||0};
 }
-function simular(F){
-  const p=S.params, st=S.stocks, c=S.congreso;
+function simular(F,Sx=S){
+  const p=Sx.params, st=Sx.stocks, c=Sx.congreso;
   const H=Math.max(3,Math.min(120,Math.round(p.horizonte||24)));
   const pi=(p.inflacion||0)/100, ri=(st.invTasa||0)/100, rd=(st.deudaTasa||0)/100, fx=st.fx||0;
   let P=st.pesos||0, I=st.inv||0, D=st.deuda||0, U=st.usd||0, L=1, factor=1;
@@ -512,8 +558,11 @@ function compute(){
   $('t-ing').textContent=money(F.ing);
   $('t-fijo').textContent=money(F.fijo);
   $('t-var').textContent=money(F.variable);
-  $('t-congreso').textContent=money(F.congreso)+(F.ing?' · '+pct(100*F.congreso/F.ing)+' del ingreso':'');
-  renderCatTotals(F);renderTiles(F,sim);renderDiagram(F,sim);renderChart(sim);renderTable(sim);renderCards(F,sim);
+  $('t-congreso').textContent=F.congreso?'drena '+money(F.congreso)+(F.ing?' · '+pct(100*F.congreso/F.ing)+' del ingreso':''):'';
+  $('t-stocks').textContent='neto '+M(sim[0].neto);
+  $('t-sup').textContent=`${pct(S.params.inflacion||0)} infl. · ${sim.length-1} meses`;
+  $('t-cats').textContent=`${S.grupos.length}`;
+  renderCatTotals(F);renderTiles(F,sim);renderDiagram(F,sim);renderChart(sim);renderTable(sim);renderCards(F,sim);renderPalancas(F,sim);
 }
 function renderTiles(F,sim){
   const liq=(S.stocks.pesos||0)+(S.stocks.usd||0)*(S.stocks.fx||0);
@@ -521,9 +570,7 @@ function renderTiles(F,sim){
   const tasa=F.ing>0?100*F.balance/F.ing:0;
   const neto0=sim[0].neto, netoH=sim[sim.length-1].neto;
   const t=[
-    {k:'Ingresos',v:money(F.ing),d:'flujo de entrada'},
-    {k:'Gastos',v:money(F.gastos),d:`${money(F.fijo)} fijos · ${money(F.variable)} variables`+(F.faltan?` · faltan ${F.faltan} montos`:'')},
-    {k:'Balance mensual',v:money(F.balance),d:F.ing?`tasa de ahorro ${pct(tasa)}`:'cargá ingresos',cls:F.balance<0?'neg':F.balance>0?'pos':''},
+    {k:'Balance mensual',v:money(F.balance),d:(F.ing?`${M(F.ing)} entran · ${M(F.gastos)} salen`:'cargá ingresos')+(F.faltan?` · faltan ${F.faltan} montos`:''),cls:F.balance<0?'neg':F.balance>0?'pos':''},
     ...(F.ingMin<F.ing?[{k:'Balance en mes malo',v:money(F.balanceMin),d:`con ingreso de ${M(F.ingMin)}`,cls:F.balanceMin<0?'neg':'pos'}]:[]),
     {k:'Colchón',v:colchon==null?'—':nf1.format(colchon)+' meses',d:'líquido ÷ gastos del mes'},
     {k:'Patrimonio neto hoy',v:M(neto0),d:'pesos + USD + inversiones − deuda'},
@@ -687,8 +734,56 @@ function renderCards(F,sim){
   }
   const order={critico:0,atencion:1,ok:2};
   C.sort((a,b)=>order[a.nivel]-order[b.nivel]);
-  $('cards').innerHTML=C.map(x=>`<div class="card ${x.nivel}"><div class="tag"><span class="lvl ${x.nivel}"></span>${x.tipo}</div><h3>${x.titulo}</h3><p>${x.texto}</p>${x.palanca?`<span class="palanca">palanca ${x.palanca}</span>`:''}</div>`).join('');
+  const card=x=>`<div class="card ${x.nivel}"><div class="tag"><span class="lvl ${x.nivel}"></span>${x.tipo}</div><h3>${x.titulo}</h3><p>${x.texto}</p>${x.palanca?`<span class="palanca">palanca ${x.palanca}</span>`:''}</div>`;
+  const alert=C.filter(x=>x.nivel!=='ok'),ok=C.filter(x=>x.nivel==='ok');
+  $('cards').innerHTML=alert.length?alert.map(card).join(''):'<p class="muted">Sin alertas con los datos cargados.</p>';
+  $('cards-ok').innerHTML=ok.map(card).join('');
+  $('ok-count').textContent=ok.length?`(${ok.length})`:'';
   document.querySelectorAll('#palancas li').forEach(li=>li.classList.toggle('on',on.has(+li.dataset.p)));
+}
+
+/* sensibilidad por palanca */
+function renderPalancas(F,base){
+  const H=base.length-1, st=S.stocks, p=S.params, mv=Math.round(S.congreso.mesVenta||0);
+  const list=[];
+  const run=(palanca,nombre,desc,forma,mod)=>{
+    const Sx=structuredClone(S);mod(Sx);
+    const sim=simular(flujos(Sx),Sx);
+    list.push({palanca,nombre,desc,forma,delta:sim[H].neto-base[H].neto,path:sim.map((r,i)=>r.neto-base[i].neto),rojo:sim.filter(r=>r.m>0&&r.D>0.5).length});
+  };
+  const rojoBase=base.filter(r=>r.m>0&&r.D>0.5).length;
+  const liq=(st.pesos||0)+(st.usd||0)*(st.fx||0);
+  if(F.variable>0)run(1,'Recortar 10 % de lo variable',`${M(F.variable*0.1)} menos por mes en supermercado, salidas, kiosco y similares.`,'Lineal: cada mes suma lo mismo. Requiere sostenerlo con voluntad.',Sx=>{for(const g of Sx.gastos)if(g.tipo==='variable'&&g.monto)g.monto*=0.9;});
+  if(F.fijo>0)run(1,'Recortar 5 % de lo fijo',`${M(F.fijo*0.05)} menos por mes renegociando o dando de baja algo fijo.`,'Lineal y estable: una decisión que después no exige nada.',Sx=>{for(const g of Sx.gastos)if(g.tipo==='fijo'&&g.monto)g.monto*=0.95;});
+  if(F.balance>0&&(p.ahorroAuto||0)<50)run(3,'Ahorro automático al 50 % del sobrante',`La mitad de lo que sobra va a inversión el día que cobrás, sin decidirlo cada mes.`,'Compuesto: arranca chico y se acelera porque el rendimiento se reinvierte.',Sx=>{Sx.params.ahorroAuto=50;});
+  const exceso=(st.pesos||0)-3*F.gastos;
+  if(exceso>0)run(3,'Mover el exceso de pesos a inversión',`${M(exceso)} que hoy están en pesos, por encima de 3 meses de gasto, pasan a inversión.`,'Compuesto y de una vez: frena la fuga por inflación desde el primer mes.',Sx=>{Sx.stocks.pesos-=exceso;Sx.stocks.inv=(Sx.stocks.inv||0)+exceso;});
+  if(F.congreso>0&&(mv===0||mv>6))run(4,'Vender Congreso en 6 meses',`Cortar el drenaje de ${M(F.congreso)} por mes${S.congreso.valorUsd?' y entrar '+nf.format(S.congreso.valorUsd)+' USD':''} en el mes 6${mv>6?` en vez del ${mv}`:' en vez de nunca'}.`,'Escalón: nada hasta la venta, después suma todos los meses.',Sx=>{Sx.congreso.mesVenta=6;});
+  if(p.inflacion>0){
+    const infA=Math.pow(1+p.inflacion/100,12)-1, ajA=p.cadaMeses>0?Math.pow(1+(p.ajuste||0)/100,12/p.cadaMeses)-1:0;
+    if(ajA<infA-0.01)run(4,'Indexar ingresos a la inflación',`Ajustar los retiros todos los meses al ritmo de la inflación, en vez de ${p.cadaMeses>0?pct(p.ajuste)+' cada '+p.cadaMeses+' meses':'no ajustar'}.`,'Lineal creciente: la brecha que hoy se abre cada mes deja de abrirse.',Sx=>{Sx.params.ajuste=Sx.params.inflacion;Sx.params.cadaMeses=1;});
+  }
+  if(st.deuda>0&&p.pagarDeuda===false&&liq>0)run(6,'Pagar la deuda hoy con la liquidez',`Cancelar ${M(Math.min(st.deuda,liq))} ahora en vez de ir pagando con el sobrante.`,'De una vez: corta el interés compuesto de la tarjeta.',Sx=>{Sx.params.pagarDeuda=true;});
+  if(F.gastos>0&&(st.pesos||0)<3*F.gastos&&(st.inv||0)>0){
+    const falta=Math.min(st.inv,3*F.gastos-(st.pesos||0));
+    run(2,'Colchón de 3 meses en pesos',`Pasar ${M(falta)} de inversión a pesos líquidos para tener 3 meses de gasto a mano.`,'Cuesta rendimiento y gana resiliencia: mirá los meses en rojo, no el patrimonio.',Sx=>{Sx.stocks.inv-=falta;Sx.stocks.pesos=(Sx.stocks.pesos||0)+falta;});
+  }
+  list.sort((a,b)=>b.delta-a.delta);
+  const maxAbs=Math.max(1,...list.map(x=>Math.abs(x.delta)));
+  const spark=path=>{const w=120,h=36,n=path.length-1,mx=Math.max(1e-9,...path.map(Math.abs));const y=v=>h/2-(v/mx)*(h/2-3);return `<svg viewBox="0 0 ${w} ${h}" class="spark" aria-hidden="true"><line x1="0" x2="${w}" y1="${h/2}" y2="${h/2}" stroke="var(--grid)"/><path d="${path.map((v,i)=>(i?'L':'M')+(i/n*w).toFixed(1)+' '+y(v).toFixed(1)).join('')}" fill="none" stroke="var(--accent)" stroke-width="1.5"/></svg>`;};
+  $('pal-rows').innerHTML=list.length?list.map(x=>{
+    const pos=x.delta>=0;
+    return `<div class="pal"><div class="pal-n">${x.palanca}</div><div class="pal-t"><b>${x.nombre}</b><span>${x.desc}</span><em>${x.forma}</em></div><div class="pal-bar"><i style="width:${(100*Math.abs(x.delta)/maxAbs).toFixed(1)}%;background:${pos?'var(--good)':'var(--crit)'}"></i></div>${spark(x.path)}<div class="pal-v ${pos?'pos':'neg'}">${pos?'+':'−'}${M(Math.abs(x.delta))}<small>patrimonio real en ${H} meses</small>${x.rojo!==rojoBase?`<small>meses en rojo: ${rojoBase} → ${x.rojo}</small>`:''}</div></div>`;
+  }).join(''):`<p class="muted">Con los datos cargados no hay ninguna palanca simulable. Completá montos y stocks.</p>`;
+  // recomendaciones
+  const rec=[];
+  const top=list.filter(x=>x.delta>0).slice(0,3);
+  top.forEach((x,i)=>rec.push(`<li><b>${x.nombre}.</b> ${x.desc} Efecto: +${M(x.delta)} en ${H} meses. ${i===0?'Es la palanca que más mueve tu sistema hoy.':''}</li>`));
+  const def=list.find(x=>x.palanca===2);
+  if(def&&def.rojo<rojoBase)rec.push(`<li><b>${def.nombre}.</b> Cuesta ${M(Math.abs(def.delta))} de patrimonio pero baja los meses en rojo de ${rojoBase} a ${def.rojo}. Es la palanca de resiliencia, no de rendimiento.</li>`);
+  if(!p.meta||!p.meta.trim())rec.push(`<li><b>Ponele una meta.</b> No se puede simular, pero es la palanca 7 y ordena todas las anteriores: define cuánto colchón, cuánto invertir y para cuándo.</li>`);
+  if(F.faltan>0)rec.push(`<li><b>Completá los ${F.faltan} montos que faltan.</b> Sin eso, el ranking de arriba compara contra un gasto que no es el real.</li>`);
+  $('pal-rec').innerHTML=rec.length?`<ol>${rec.join('')}</ol>`:'<p class="muted">Nada que recomendar con lo cargado.</p>';
 }
 
 /* ---------- tipo de cambio ---------- */
@@ -740,6 +835,15 @@ async function initDb(){
   }catch(e){setStatus('Guardado en este navegador');}
 }
 
+function showTab(n){
+  document.querySelectorAll('.tab').forEach(s=>{s.hidden=s.id!=='tab-'+n;});
+  document.querySelectorAll('.tabs [role=tab]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.tab===n)));
+  try{localStorage.setItem(KEY+'-tab',n);}catch(e){}
+}
+document.querySelector('.tabs').addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(b)showTab(b.dataset.tab);});
+let tab0='datos';try{tab0=localStorage.getItem(KEY+'-tab')||'datos';}catch(e){}
+if(!document.getElementById('tab-'+tab0))tab0='datos';
+showTab(tab0);
 loadLocal();renderRows();renderCats();renderFields();fxUI();compute();setStatus('Los cambios se guardan solos');initDb().then(actualizarFx);
 })();
 </script>
