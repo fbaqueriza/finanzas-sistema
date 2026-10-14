@@ -54,6 +54,17 @@ body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px
 .grp-body.fields{padding-top:14px}
 .grp-body.grid2{padding-top:14px}
 .rec-panel h2{margin-bottom:10px}
+.levers{display:grid;gap:16px;padding-top:14px}
+.lever{display:grid;grid-template-columns:32px minmax(0,1fr);gap:12px;align-items:start}
+.lever>div{display:grid;gap:3px;min-width:0}
+.lever b{font-weight:600}
+.lever>div>span{font-size:13px;color:var(--fg2)}
+.lever .fields{margin-top:6px}
+.palancas li{grid-template-columns:28px minmax(0,1fr) auto}
+.palancas li em{font-style:normal;font-family:var(--mono);font-size:11px;padding:2px 8px;border-radius:3px;background:var(--surface-2);color:var(--muted);white-space:nowrap}
+.palancas li.on em{background:var(--accent-soft);color:var(--accent-ink)}
+.palancas li.rec em{background:var(--warn);color:#1a1200}
+.palancas li span small{display:block;font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:1px}
 header h1{font-family:var(--display);font-weight:700;font-size:clamp(28px,4.5vw,40px);line-height:1.05;margin:4px 0 10px;letter-spacing:-.01em;text-wrap:balance}
 .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-ink);margin:0}
 .lede{max-width:62ch;color:var(--fg2);margin:0 0 8px}
@@ -228,6 +239,20 @@ footer p{margin:4px 0}
     </div>
   </details>
 
+  <details class="grp" open>
+    <summary><span>Palancas <small>qué hacés hoy</small></span><b id="t-pal"></b></summary>
+    <div class="grp-body levers">
+      <div class="lever"><div class="pal-n">1</div><div><b>Parámetros</b><span>Recortar gastos puntuales. Se activa editando los montos; acá podés fijarte un tope.</span><div class="fields"><div class="field"><label for="l-tope">Tope mensual para lo variable ($)</label><input type="number" id="l-tope" data-path="palancas.tope" step="10000" placeholder="sin tope"></div></div></div></div>
+      <div class="lever"><div class="pal-n">2</div><div><b>Buffer</b><span>Colchón de liquidez que absorbe shocks sin activar la deuda.</span><div class="fields"><div class="field"><label for="l-colchon">Colchón objetivo (meses de gasto)</label><input type="number" id="l-colchon" data-path="palancas.colchonMeses" step="1" min="0"></div></div></div></div>
+      <div class="lever"><div class="pal-n">3</div><div><b>Estructura de flujos</b><span>Lo que se ahorra sin decidirlo cada mes.</span><div class="fields"><div class="field"><label for="p-ahorroAuto">Ahorro automático (% del sobrante)</label><input type="number" id="p-ahorroAuto" data-path="params.ahorroAuto" step="5" min="0" max="100"><span class="hint">transferencia a inversión el día que cobrás</span></div></div></div></div>
+      <div class="lever"><div class="pal-n">4</div><div><b>Retardos</b><span>Cuánto tarda la información en llegarte y cuánto tarda en cortarse lo que drena.</span><div class="fields"><div class="field"><label class="check"><input type="checkbox" id="l-verDia" data-path="palancas.verGastosDia"> Veo cada gasto el mismo día (débito, app del banco)</label><span class="hint">la fecha de venta de Congreso y el ajuste de ingresos van en sus grupos</span></div></div></div></div>
+      <div class="lever"><div class="pal-n">5</div><div><b>Flujos de información</b><span>Con qué frecuencia mirás el sistema entero.</span><div class="fields"><div class="field"><label for="l-rev">Revisión del tablero</label><select id="l-rev" data-path="palancas.revision"><option value="nunca">Nunca</option><option value="mensual">Mensual</option><option value="semanal">Semanal</option></select></div></div></div></div>
+      <div class="lever"><div class="pal-n">6</div><div><b>Reglas</b><span>Decisiones tomadas una sola vez.</span><div class="fields"><div class="field"><label class="check"><input type="checkbox" id="l-debito" data-path="palancas.reglaDebito"> Lo variable sale con débito, no con tarjeta</label></div><div class="field"><label class="check"><input type="checkbox" id="l-cuotas" data-path="palancas.reglaCuotas"> Tarjeta solo para cuotas sin interés</label></div><div class="field"><label class="check"><input type="checkbox" id="p-pagarDeuda" data-path="params.pagarDeuda"> Pago la deuda con la liquidez disponible</label></div></div></div></div>
+      <div class="lever"><div class="pal-n">7</div><div><b>Metas</b><span>Para qué, cuánto y para cuándo.</span><div class="fields"><div class="field"><label for="p-meta">¿Para qué ahorrás?</label><input type="text" id="p-meta" data-path="params.meta" placeholder="una meta concreta"></div><div class="field"><label for="l-metaMonto">Cuánto necesitás juntar ($ de hoy)</label><input type="number" id="l-metaMonto" data-path="palancas.metaMonto" step="100000" placeholder="0"></div><div class="field"><label for="l-metaMeses">En cuántos meses</label><input type="number" id="l-metaMeses" data-path="palancas.metaMeses" step="1" min="1" placeholder="0"></div></div></div></div>
+      <div class="lever"><div class="pal-n">8</div><div><b>Paradigma</b><span>La idea desde la que mirás la plata. No se simula, pero ordena todo lo demás.</span><div class="fields"><div class="field"><label for="l-paradigma">En una frase, ¿qué es la plata para vos?</label><input type="text" id="l-paradigma" data-path="palancas.paradigma" placeholder="tiempo libre, seguridad, libertad para elegir proyectos…"></div></div></div></div>
+    </div>
+  </details>
+
   <details class="grp">
     <summary><span>Depto Congreso <small>stock en venta</small></span><b id="t-congreso"></b></summary>
     <div class="grp-body">
@@ -248,9 +273,6 @@ footer p{margin:4px 0}
       <div class="field"><label for="p-ajuste">Ajuste de ingresos (%)</label><input type="number" id="p-ajuste" data-path="params.ajuste" step="1"></div>
       <div class="field"><label for="p-cadaMeses">…cada cuántos meses</label><input type="number" id="p-cadaMeses" data-path="params.cadaMeses" step="1" min="0"><span class="hint">0 = sin ajuste</span></div>
       <div class="field"><label for="p-mesesMalos">Meses malos por año</label><input type="number" id="p-mesesMalos" data-path="params.mesesMalos" step="1" min="0" max="12"><span class="hint">usan el ingreso de mes malo</span></div>
-      <div class="field"><label for="p-ahorroAuto">Ahorro automático (% del sobrante)</label><input type="number" id="p-ahorroAuto" data-path="params.ahorroAuto" step="5" min="0" max="100"><span class="hint">va a inversión sin decidirlo cada mes</span></div>
-      <div class="field"><label for="p-meta">¿Para qué ahorrás?</label><input type="text" id="p-meta" data-path="params.meta" placeholder="una meta concreta"></div>
-      <div class="field"><label class="check"><input type="checkbox" id="p-pagarDeuda" data-path="params.pagarDeuda"> Pagar la deuda con la liquidez disponible</label><span class="hint">apagado: solo se paga con el sobrante del mes</span></div>
     </div>
   </details>
 
@@ -337,19 +359,8 @@ footer p{margin:4px 0}
   <div class="cards" id="cards"></div>
   <details><summary>Lo que está bien <span id="ok-count"></span></summary><div class="cards" id="cards-ok" style="margin-top:10px"></div></details>
 
-  <details>
-    <summary>Las ocho palancas, de la más débil a la más fuerte</summary>
-    <ol class="palancas" id="palancas">
-      <li data-p="1"><span><b>Parámetros.</b> Recortar un gasto puntual. Lo más común y lo menos efectivo.</span></li>
-      <li data-p="2"><span><b>Buffers.</b> Fondo de emergencia. Amortigua shocks y evita caer en deuda.</span></li>
-      <li data-p="3"><span><b>Estructura de flujos.</b> Transferencia automática a ahorro el día que cobrás.</span></li>
-      <li data-p="4"><span><b>Retardos.</b> Ver el gasto el mismo día, no al cierre del resumen. Acortar el tiempo hasta vender lo que drena.</span></li>
-      <li data-p="5"><span><b>Flujos de información.</b> Un tablero mensual simple. Lo que no se ve no se gobierna.</span></li>
-      <li data-p="6"><span><b>Reglas.</b> Débito para lo variable, tarjeta solo para cuotas sin interés.</span></li>
-      <li data-p="7"><span><b>Metas.</b> Para qué ahorrás. Sin meta el bucle de balance no tiene referencia.</span></li>
-      <li data-p="8"><span><b>Paradigma.</b> Tu relación con el dinero. La más fuerte y la más difícil.</span></li>
-    </ol>
-  </details>
+  <div class="sec-head"><h2>Estado de las palancas</h2><p>De la más débil a la más fuerte, según Meadows. Qué tenés activa hoy y cuál te está pidiendo el diagnóstico. Se configuran en Datos, grupo Palancas.</p></div>
+  <div class="panel"><ol class="palancas" id="palancas"></ol></div>
   <details>
     <summary>Glosario</summary>
     <div class="gloss">
@@ -397,7 +408,8 @@ const DEF={
   ],
   stocks:{pesos:null,usd:null,fx:1535,fxTipo:'oficial',fxFecha:'2026-10-13T18:00:00.000Z',inv:null,invTasa:3,deuda:null,deudaTasa:8},
   congreso:{valorUsd:null,mesVenta:0,grupo:'congreso'},
-  params:{inflacion:1.9,horizonte:24,ajuste:10,cadaMeses:6,ahorroAuto:0,pagarDeuda:true,mesesMalos:0,meta:''}
+  params:{inflacion:1.9,horizonte:24,ajuste:10,cadaMeses:6,ahorroAuto:0,pagarDeuda:true,mesesMalos:0,meta:''},
+  palancas:{tope:null,colchonMeses:3,verGastosDia:false,revision:'nunca',reglaDebito:false,reglaCuotas:false,metaMonto:null,metaMeses:null,paradigma:''}
 };
 let S=structuredClone(DEF), DB=null, dirty=false, saveT=null, saving=false, pending=false;
 
@@ -417,7 +429,7 @@ function merge(base,saved){
   if(Array.isArray(saved.ingresos))out.ingresos=saved.ingresos;
   if(Array.isArray(saved.gastos))out.gastos=saved.gastos;
   if(Array.isArray(saved.grupos)&&saved.grupos.length)out.grupos=saved.grupos.map(String);
-  for(const k of ['stocks','congreso','params'])if(saved[k]&&typeof saved[k]==='object')Object.assign(out[k],saved[k]);
+  for(const k of ['stocks','congreso','params','palancas'])if(saved[k]&&typeof saved[k]==='object')Object.assign(out[k],saved[k]);
   for(const g of out.gastos){if(!g.grupo)g.grupo=out.grupos[0];if(!out.grupos.includes(g.grupo))out.grupos.push(g.grupo);}
   if(!out.grupos.includes(out.congreso.grupo))out.congreso.grupo=out.grupos[0];
   if(!(out.stocks.fx>0)&&out.stocks.fxTipo!=='manual'){out.stocks.fx=base.stocks.fx;out.stocks.fxFecha=base.stocks.fxFecha;}
@@ -562,7 +574,7 @@ function compute(){
   $('t-stocks').textContent='neto '+M(sim[0].neto);
   $('t-sup').textContent=`${pct(S.params.inflacion||0)} infl. · ${sim.length-1} meses`;
   $('t-cats').textContent=`${S.grupos.length}`;
-  renderCatTotals(F);renderTiles(F,sim);renderDiagram(F,sim);renderChart(sim);renderTable(sim);renderCards(F,sim);renderPalancas(F,sim);
+  renderCatTotals(F);renderTiles(F,sim);renderDiagram(F,sim);renderChart(sim);renderTable(sim);const on=renderCards(F,sim);renderPalancas(F,sim);renderEstado(F,sim,on);
 }
 function renderTiles(F,sim){
   const liq=(S.stocks.pesos||0)+(S.stocks.usd||0)*(S.stocks.fx||0);
@@ -663,12 +675,23 @@ function renderTable(sim){
 
 /* systemic reading */
 function renderCards(F,sim){
-  const C=[];const st=S.stocks,p=S.params,c=S.congreso;const n=sim.length-1;
+  const C=[];const st=S.stocks,p=S.params,c=S.congreso,pl=S.palancas;const n=sim.length-1;
   const add=(tipo,nivel,titulo,texto,palanca)=>C.push({tipo,nivel,titulo,texto,palanca});
   const liq=(st.pesos||0)+(st.usd||0)*(st.fx||0);
   const colchon=F.gastos>0?liq/F.gastos:null;
+  const objC=pl.colchonMeses>0?pl.colchonMeses:3;
   const tasa=F.ing>0?100*F.balance/F.ing:null;
   const on=new Set();
+  if(pl.tope>0&&F.variable>pl.tope){add('parámetro','atencion','Lo variable supera el tope',`Cargaste ${M(F.variable)} de gasto variable contra un tope de ${M(pl.tope)}. Recortar ${M(F.variable-pl.tope)} es la palanca 1: funciona, pero hay que sostenerla cada mes.`,1);on.add(1);}
+  if(!pl.verGastosDia){add('retardo','atencion','Ves el gasto cuando llega el resumen',`El bucle de balance corrige con 30 a 40 días de retardo y por eso sobrecorrige. Pagar lo variable con débito o mirar la app el mismo día acorta ese retardo a cero.`,4);on.add(4);}
+  if(pl.revision==='nunca'){add('información','atencion','Sin tablero',`No revisás el sistema con ninguna frecuencia. Lo que no se ve no se gobierna: una revisión mensual de esta página alcanza para que la referencia del bucle no se deslice.`,5);on.add(5);}
+  if(st.deuda>0&&!pl.reglaCuotas){add('regla','atencion','Sin regla para la tarjeta',`Hay deuda y no hay una regla que impida volver a financiarla. "Tarjeta solo para cuotas sin interés" es una decisión que se toma una vez y después no exige voluntad.`,6);on.add(6);}
+  if(pl.metaMonto>0){
+    const hit=sim.findIndex(r=>r.neto-sim[0].neto>=pl.metaMonto);
+    if(hit<0)add('meta','atencion','La meta no se alcanza en el horizonte',`Para juntar ${M(pl.metaMonto)} en pesos de hoy necesitás más de ${n} meses con los supuestos cargados. O cambia una palanca de arriba, o cambia el plazo.`,7);
+    else if(pl.metaMeses>0&&hit>pl.metaMeses)add('meta','atencion','La meta llega tarde',`Juntás ${M(pl.metaMonto)} en el mes ${hit}, y te la propusiste para el mes ${pl.metaMeses}. Mirá qué palanca de sensibilidad acorta la brecha.`,7);
+    else add('meta','ok','La meta llega',`Juntás ${M(pl.metaMonto)} en el mes ${hit}${pl.metaMeses>0?`, antes del mes ${pl.metaMeses} que te propusiste`:''}.`);
+  }
 
   const prov=F.faltan>0?' Dato provisorio: faltan montos.':'';
   if(F.faltan>0)add('información',F.faltan>5?'critico':'atencion','Faltan montos',`Hay ${F.faltan} gastos sin monto. El modelo los toma como cero, así que el balance está inflado. Meadows: la calidad de la información que llega al bucle de balance define su comportamiento.`,5);
@@ -688,8 +711,8 @@ function renderCards(F,sim){
   }
   if(colchon!=null){
     if(colchon<1){add('buffer','critico','Sin colchón',`Tenés ${nf1.format(colchon)} meses de gasto en líquido. Cualquier imprevisto cae directo en deuda. El buffer es la segunda palanca de Meadows y acá está vacía.`,2);on.add(2);}
-    else if(colchon<3){add('buffer','atencion','Colchón corto',`${nf1.format(colchon)} meses de gasto. Un buffer de 3 a 6 meses absorbe shocks sin activar el bucle de la deuda.`,2);on.add(2);}
-    else add('buffer','ok','Colchón suficiente',`${nf1.format(colchon)} meses de gasto en líquido. El sistema tiene amortiguación.`);
+    else if(colchon<objC){add('buffer','atencion','Colchón por debajo del objetivo',`${nf1.format(colchon)} meses de gasto contra un objetivo de ${objC}. Faltan ${M((objC-colchon)*F.gastos)} para que un shock no active el bucle de la deuda.`,2);on.add(2);}
+    else add('buffer','ok','Colchón en objetivo',`${nf1.format(colchon)} meses de gasto en líquido, objetivo ${objC}. El sistema tiene amortiguación.`);
   }
   if(F.balance>0&&!(p.ahorroAuto>0)){add('estructura','atencion','El ahorro depende de la voluntad',`Ahorro automático en 0 %. Lo que sobra queda en pesos y la inflación se lo come. Mover la estructura del flujo (transferencia el día que cobrás) vale más que cualquier recorte.`,3);on.add(3);}
   if(p.ahorroAuto>0)on.add(3);
@@ -723,7 +746,7 @@ function renderCards(F,sim){
   }else if(p.cadaMeses===0&&p.inflacion>0)add('retardo','critico','Ingreso congelado',`Sin ajuste de ingresos y con ${pct(p.inflacion)} de inflación mensual, el ingreso real cae ${pct(100*(1-Math.pow(1+p.inflacion/100,-12)))} por año. Es el retardo más caro del sistema.`,4);
   if(st.pesos>0&&p.inflacion>0){
     const ev=st.pesos*p.inflacion/100;
-    if(F.gastos>0&&st.pesos>3*F.gastos)add('flujo invisible','atencion','Pesos de más',`Tenés ${M(st.pesos)} en pesos, más de 3 meses de gasto. La inflación evapora ${M(ev)} por mes sin que figure en ningún resumen. Lo que exceda el colchón debería estar en dólares o invertido.`,3);
+    if(F.gastos>0&&st.pesos>objC*F.gastos)add('flujo invisible','atencion','Pesos de más',`Tenés ${M(st.pesos)} en pesos, más de ${objC} meses de gasto. La inflación evapora ${M(ev)} por mes sin que figure en ningún resumen. Lo que exceda el colchón debería estar en dólares o invertido.`,3);
   }
   if(!p.meta||!p.meta.trim()){add('meta','atencion','Sin meta',`No hay una meta cargada. Un bucle de balance sin referencia no sabe cuándo está bien. Meadows la pone en la palanca 7: cambiar la meta cambia todo lo que está abajo.`,7);}
   else{add('meta','ok','Meta: '+esc(p.meta),`El bucle tiene referencia. Cada tile de arriba se lee contra esto.`);on.add(7);}
@@ -739,7 +762,26 @@ function renderCards(F,sim){
   $('cards').innerHTML=alert.length?alert.map(card).join(''):'<p class="muted">Sin alertas con los datos cargados.</p>';
   $('cards-ok').innerHTML=ok.map(card).join('');
   $('ok-count').textContent=ok.length?`(${ok.length})`:'';
-  document.querySelectorAll('#palancas li').forEach(li=>li.classList.toggle('on',on.has(+li.dataset.p)));
+  return on;
+}
+function renderEstado(F,sim,rec){
+  const pl=S.palancas,p=S.params,st=S.stocks,mv=Math.round(S.congreso.mesVenta||0);
+  const liq=(st.pesos||0)+(st.usd||0)*(st.fx||0);
+  const colchon=F.gastos>0?liq/F.gastos:0, objC=pl.colchonMeses>0?pl.colchonMeses:3;
+  const reglas=[pl.reglaDebito&&'débito para lo variable',pl.reglaCuotas&&'solo cuotas sin interés',p.pagarDeuda!==false&&'deuda se paga con liquidez'].filter(Boolean);
+  const L=[
+    {n:'Parámetros',on:pl.tope>0,s:pl.tope>0?`tope variable ${M(pl.tope)}${F.variable>pl.tope?' · superado':''}`:'sin tope cargado'},
+    {n:'Buffer',on:colchon>=objC,s:`objetivo ${objC} meses · tenés ${nf1.format(colchon)}`},
+    {n:'Estructura de flujos',on:(p.ahorroAuto||0)>0,s:(p.ahorroAuto||0)>0?`ahorro automático ${pct(p.ahorroAuto)} del sobrante`:'ahorro automático en 0 %'},
+    {n:'Retardos',on:!!pl.verGastosDia,s:`${pl.verGastosDia?'ves el gasto el mismo día':'ves el gasto con el resumen'} · Congreso ${mv>0?'mes '+mv:'sin fecha'} · ingresos ${p.cadaMeses>0?pct(p.ajuste)+' cada '+p.cadaMeses+' m':'sin ajuste'}`},
+    {n:'Flujos de información',on:pl.revision&&pl.revision!=='nunca',s:`revisión ${pl.revision||'nunca'}`},
+    {n:'Reglas',on:reglas.length>0,s:reglas.length?reglas.join(' · '):'ninguna regla fijada'},
+    {n:'Metas',on:!!(p.meta&&p.meta.trim()),s:p.meta&&p.meta.trim()?`${esc(p.meta.trim())}${pl.metaMonto>0?' · '+M(pl.metaMonto):''}${pl.metaMeses>0?' en '+pl.metaMeses+' meses':''}`:'sin meta'},
+    {n:'Paradigma',on:!!(pl.paradigma&&pl.paradigma.trim()),s:pl.paradigma&&pl.paradigma.trim()?esc(pl.paradigma.trim()):'sin definir'}
+  ];
+  $('palancas').innerHTML=L.map((x,i)=>{const r=rec.has(i+1);return `<li class="${x.on?'on':''} ${r?'rec':''}"><span><b>${x.n}.</b><small>${x.s}</small></span><em>${r&&x.on?'activa · te pide más':r?'te la pide':x.on?'activa':'sin activar'}</em></li>`;}).join('');
+  const act=L.filter(x=>x.on).length;
+  $('t-pal').textContent=`${act} de 8 activas`;
 }
 
 /* sensibilidad por palanca */
@@ -756,17 +798,18 @@ function renderPalancas(F,base){
   if(F.variable>0)run(1,'Recortar 10 % de lo variable',`${M(F.variable*0.1)} menos por mes en supermercado, salidas, kiosco y similares.`,'Lineal: cada mes suma lo mismo. Requiere sostenerlo con voluntad.',Sx=>{for(const g of Sx.gastos)if(g.tipo==='variable'&&g.monto)g.monto*=0.9;});
   if(F.fijo>0)run(1,'Recortar 5 % de lo fijo',`${M(F.fijo*0.05)} menos por mes renegociando o dando de baja algo fijo.`,'Lineal y estable: una decisión que después no exige nada.',Sx=>{for(const g of Sx.gastos)if(g.tipo==='fijo'&&g.monto)g.monto*=0.95;});
   if(F.balance>0&&(p.ahorroAuto||0)<50)run(3,'Ahorro automático al 50 % del sobrante',`La mitad de lo que sobra va a inversión el día que cobrás, sin decidirlo cada mes.`,'Compuesto: arranca chico y se acelera porque el rendimiento se reinvierte.',Sx=>{Sx.params.ahorroAuto=50;});
-  const exceso=(st.pesos||0)-3*F.gastos;
-  if(exceso>0)run(3,'Mover el exceso de pesos a inversión',`${M(exceso)} que hoy están en pesos, por encima de 3 meses de gasto, pasan a inversión.`,'Compuesto y de una vez: frena la fuga por inflación desde el primer mes.',Sx=>{Sx.stocks.pesos-=exceso;Sx.stocks.inv=(Sx.stocks.inv||0)+exceso;});
+  const objC=S.palancas.colchonMeses>0?S.palancas.colchonMeses:3;
+  const exceso=(st.pesos||0)-objC*F.gastos;
+  if(exceso>0)run(3,'Mover el exceso de pesos a inversión',`${M(exceso)} que hoy están en pesos, por encima de ${objC} meses de gasto, pasan a inversión.`,'Compuesto y de una vez: frena la fuga por inflación desde el primer mes.',Sx=>{Sx.stocks.pesos-=exceso;Sx.stocks.inv=(Sx.stocks.inv||0)+exceso;});
   if(F.congreso>0&&(mv===0||mv>6))run(4,'Vender Congreso en 6 meses',`Cortar el drenaje de ${M(F.congreso)} por mes${S.congreso.valorUsd?' y entrar '+nf.format(S.congreso.valorUsd)+' USD':''} en el mes 6${mv>6?` en vez del ${mv}`:' en vez de nunca'}.`,'Escalón: nada hasta la venta, después suma todos los meses.',Sx=>{Sx.congreso.mesVenta=6;});
   if(p.inflacion>0){
     const infA=Math.pow(1+p.inflacion/100,12)-1, ajA=p.cadaMeses>0?Math.pow(1+(p.ajuste||0)/100,12/p.cadaMeses)-1:0;
     if(ajA<infA-0.01)run(4,'Indexar ingresos a la inflación',`Ajustar los retiros todos los meses al ritmo de la inflación, en vez de ${p.cadaMeses>0?pct(p.ajuste)+' cada '+p.cadaMeses+' meses':'no ajustar'}.`,'Lineal creciente: la brecha que hoy se abre cada mes deja de abrirse.',Sx=>{Sx.params.ajuste=Sx.params.inflacion;Sx.params.cadaMeses=1;});
   }
   if(st.deuda>0&&p.pagarDeuda===false&&liq>0)run(6,'Pagar la deuda hoy con la liquidez',`Cancelar ${M(Math.min(st.deuda,liq))} ahora en vez de ir pagando con el sobrante.`,'De una vez: corta el interés compuesto de la tarjeta.',Sx=>{Sx.params.pagarDeuda=true;});
-  if(F.gastos>0&&(st.pesos||0)<3*F.gastos&&(st.inv||0)>0){
-    const falta=Math.min(st.inv,3*F.gastos-(st.pesos||0));
-    run(2,'Colchón de 3 meses en pesos',`Pasar ${M(falta)} de inversión a pesos líquidos para tener 3 meses de gasto a mano.`,'Cuesta rendimiento y gana resiliencia: mirá los meses en rojo, no el patrimonio.',Sx=>{Sx.stocks.inv-=falta;Sx.stocks.pesos=(Sx.stocks.pesos||0)+falta;});
+  if(F.gastos>0&&(st.pesos||0)<objC*F.gastos&&(st.inv||0)>0){
+    const falta=Math.min(st.inv,objC*F.gastos-(st.pesos||0));
+    run(2,`Colchón de ${objC} meses en pesos`,`Pasar ${M(falta)} de inversión a pesos líquidos para tener ${objC} meses de gasto a mano.`,'Cuesta rendimiento y gana resiliencia: mirá los meses en rojo, no el patrimonio.',Sx=>{Sx.stocks.inv-=falta;Sx.stocks.pesos=(Sx.stocks.pesos||0)+falta;});
   }
   list.sort((a,b)=>b.delta-a.delta);
   const maxAbs=Math.max(1,...list.map(x=>Math.abs(x.delta)));
@@ -781,7 +824,9 @@ function renderPalancas(F,base){
   top.forEach((x,i)=>rec.push(`<li><b>${x.nombre}.</b> ${x.desc} Efecto: +${M(x.delta)} en ${H} meses. ${i===0?'Es la palanca que más mueve tu sistema hoy.':''}</li>`));
   const def=list.find(x=>x.palanca===2);
   if(def&&def.rojo<rojoBase)rec.push(`<li><b>${def.nombre}.</b> Cuesta ${M(Math.abs(def.delta))} de patrimonio pero baja los meses en rojo de ${rojoBase} a ${def.rojo}. Es la palanca de resiliencia, no de rendimiento.</li>`);
-  if(!p.meta||!p.meta.trim())rec.push(`<li><b>Ponele una meta.</b> No se puede simular, pero es la palanca 7 y ordena todas las anteriores: define cuánto colchón, cuánto invertir y para cuándo.</li>`);
+  if(!p.meta||!p.meta.trim())rec.push(`<li><b>Ponele una meta.</b> No se puede simular, pero es la palanca 7 y ordena todas las anteriores: define cuánto colchón, cuánto invertir y para cuándo. Se carga en Datos, grupo Palancas.</li>`);
+  const pl=S.palancas, sinCosto=[!pl.verGastosDia&&'ver el gasto el mismo día',pl.revision==='nunca'&&'revisar el tablero una vez por mes',!pl.reglaCuotas&&'tarjeta solo para cuotas sin interés'].filter(Boolean);
+  if(sinCosto.length)rec.push(`<li><b>Palancas que no cuestan nada:</b> ${sinCosto.join(', ')}. No mueven el patrimonio en la simulación, pero son las que evitan que el sistema se desvíe sin que lo veas.</li>`);
   if(F.faltan>0)rec.push(`<li><b>Completá los ${F.faltan} montos que faltan.</b> Sin eso, el ranking de arriba compara contra un gasto que no es el real.</li>`);
   $('pal-rec').innerHTML=rec.length?`<ol>${rec.join('')}</ol>`:'<p class="muted">Nada que recomendar con lo cargado.</p>';
 }
