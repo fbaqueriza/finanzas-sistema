@@ -50,7 +50,7 @@ section{display:grid;gap:14px}
 .panel>h2{margin-bottom:10px}
 .rows{display:grid;gap:6px}
 .row{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(110px,.9fr) minmax(0,.9fr) 28px;gap:6px;align-items:center}
-.row.ing{grid-template-columns:minmax(0,1.6fr) minmax(110px,.9fr) 28px}
+.row.ing{grid-template-columns:minmax(0,1.4fr) minmax(100px,.9fr) minmax(100px,.9fr) 28px}
 .row.cat{grid-template-columns:minmax(0,1fr) 28px}
 .row-head{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
 .row-head span{min-width:0}
@@ -138,6 +138,8 @@ footer p{margin:4px 0}
   <div class="grid2">
     <div class="panel">
       <h2>Ingresos <small>flujo de entrada</small></h2>
+      <p style="margin:0 0 8px;color:var(--fg2);font-size:14px">Si el ingreso es un retiro del negocio u otro flujo variable, cargá el típico y el de un mes malo.</p>
+      <div class="row ing row-head"><span>Fuente</span><span>Típico $ / mes</span><span>Mes malo $</span><span></span></div>
       <div class="rows" id="ingresos"></div>
       <button class="add" data-add="ingresos">+ agregar ingreso</button>
       <div class="subtotal"><span>Total ingresos</span><b id="t-ing"></b></div>
@@ -180,6 +182,7 @@ footer p{margin:4px 0}
         <div class="field"><label for="p-horizonte">Horizonte (meses)</label><input type="number" id="p-horizonte" data-path="params.horizonte" step="1" min="3" max="120"></div>
         <div class="field"><label for="p-ajuste">Ajuste de ingresos (%)</label><input type="number" id="p-ajuste" data-path="params.ajuste" step="1"></div>
         <div class="field"><label for="p-cadaMeses">…cada cuántos meses</label><input type="number" id="p-cadaMeses" data-path="params.cadaMeses" step="1" min="0"><span class="hint">0 = sin ajuste</span></div>
+        <div class="field"><label for="p-mesesMalos">Meses malos por año</label><input type="number" id="p-mesesMalos" data-path="params.mesesMalos" step="1" min="0" max="12"><span class="hint">la simulación usa el ingreso de mes malo esos meses</span></div>
         <div class="field"><label for="p-ahorroAuto">Ahorro automático (% del sobrante)</label><input type="number" id="p-ahorroAuto" data-path="params.ahorroAuto" step="5" min="0" max="100"><span class="hint">lo que va a inversiones sin decidirlo cada mes</span></div>
         <div class="field"><label for="p-meta">¿Para qué ahorrás?</label><input type="text" id="p-meta" data-path="params.meta" placeholder="una meta concreta"></div>
         <div class="field"><label class="check"><input type="checkbox" id="p-pagarDeuda" data-path="params.pagarDeuda"> Pagar la deuda con la liquidez disponible</label><span class="hint">si está apagado, la deuda solo se paga con el sobrante del mes</span></div>
@@ -322,7 +325,7 @@ footer p{margin:4px 0}
 const KEY='finanzas-sistema-v1';
 const DEF={
   grupos:['vivienda','congreso','talleres','deporte','ocio','salud','servicios','proyectos','consumo','transporte','otro'],
-  ingresos:[{id:'i1',nombre:'Ingreso principal',monto:3000000}],
+  ingresos:[{id:'i1',nombre:'Retiros del negocio',monto:3000000,minimo:null}],
   gastos:[
     {id:'g1',nombre:'Alquiler depto Retiro',monto:null,tipo:'fijo',grupo:'vivienda'},
     {id:'g2',nombre:'Expensas depto Congreso',monto:null,tipo:'fijo',grupo:'congreso'},
@@ -348,7 +351,7 @@ const DEF={
   ],
   stocks:{pesos:null,usd:null,fx:1535,fxTipo:'oficial',fxFecha:'2026-10-13T18:00:00.000Z',inv:null,invTasa:3,deuda:null,deudaTasa:8},
   congreso:{valorUsd:null,mesVenta:0,grupo:'congreso'},
-  params:{inflacion:1.9,horizonte:24,ajuste:10,cadaMeses:6,ahorroAuto:0,pagarDeuda:true,meta:''}
+  params:{inflacion:1.9,horizonte:24,ajuste:10,cadaMeses:6,ahorroAuto:0,pagarDeuda:true,mesesMalos:0,meta:''}
 };
 let S=structuredClone(DEF), DB=null, dirty=false, saveT=null, saving=false, pending=false;
 
@@ -380,6 +383,7 @@ function rowHtml(list,r){
   if(list==='ingresos')return `<div class="row ing" data-id="${r.id}">
     <input type="text" id="${r.id}-nombre" data-list="ingresos" data-id="${r.id}" data-field="nombre" value="${esc(r.nombre)}" placeholder="concepto">
     <input type="number" id="${r.id}-monto" data-list="ingresos" data-id="${r.id}" data-field="monto" value="${r.monto??''}" step="10000" placeholder="0">
+    <input type="number" id="${r.id}-minimo" data-list="ingresos" data-id="${r.id}" data-field="minimo" value="${r.minimo??''}" step="10000" placeholder="= típico" title="ingreso en un mes malo">
     <button class="del" data-del="ingresos" data-id="${r.id}" title="quitar" aria-label="quitar">×</button></div>`;
   return `<div class="row" data-id="${r.id}">
     <input type="text" id="${r.id}-nombre" data-list="gastos" data-id="${r.id}" data-field="nombre" value="${esc(r.nombre)}" placeholder="concepto">
@@ -426,7 +430,7 @@ document.addEventListener('input',e=>{
   }else if(el.dataset.list){
     const r=S[el.dataset.list].find(x=>x.id===el.dataset.id);if(!r)return;
     const f=el.dataset.field;
-    r[f]= f==='monto'?num(el.value):el.value;
+    r[f]= (f==='monto'||f==='minimo')?num(el.value):el.value;
     if(f==='monto')el.classList.toggle('faltante',r.monto==null);
   }else return;
   dirty=true;compute();scheduleSave();
@@ -451,7 +455,7 @@ document.addEventListener('click',e=>{
     renderRows();renderCats();
   }else if(b.dataset.add){
     const id=(b.dataset.add==='ingresos'?'i':'g')+Date.now().toString(36);
-    if(b.dataset.add==='ingresos')S.ingresos.push({id,nombre:'',monto:null});
+    if(b.dataset.add==='ingresos')S.ingresos.push({id,nombre:'',monto:null,minimo:null});
     else S.gastos.push({id,nombre:'',monto:null,tipo:b.dataset.tipo,grupo:'otro'});
     renderRows();const el=$(id+'-nombre');if(el)el.focus();
   }else if(b.dataset.del){
@@ -464,25 +468,30 @@ document.addEventListener('click',e=>{
 /* ---------- model ---------- */
 function flujos(){
   const ing=sum(S.ingresos.map(i=>i.monto));
+  const ingMin=sum(S.ingresos.map(i=>i.minimo!=null?i.minimo:i.monto));
   const g=S.gastos;
   const fijo=sum(g.filter(x=>x.tipo==='fijo').map(x=>x.monto));
   const variable=sum(g.filter(x=>x.tipo==='variable').map(x=>x.monto));
   const porGrupo={};for(const x of g)porGrupo[x.grupo]=(porGrupo[x.grupo]||0)+(x.monto||0);
   const gastos=fijo+variable;
   const faltan=g.filter(x=>x.monto==null).length;
-  return {ing,fijo,variable,gastos,porGrupo,faltan,balance:ing-gastos,congreso:porGrupo[S.congreso.grupo]||0,vivienda:porGrupo.vivienda||0};
+  return {ing,ingMin,fijo,variable,gastos,porGrupo,faltan,balance:ing-gastos,balanceMin:ingMin-gastos,congreso:porGrupo[S.congreso.grupo]||0,vivienda:porGrupo.vivienda||0};
 }
 function simular(F){
   const p=S.params, st=S.stocks, c=S.congreso;
   const H=Math.max(3,Math.min(120,Math.round(p.horizonte||24)));
   const pi=(p.inflacion||0)/100, ri=(st.invTasa||0)/100, rd=(st.deudaTasa||0)/100, fx=st.fx||0;
-  let P=st.pesos||0, I=st.inv||0, D=st.deuda||0, U=st.usd||0, L=1, ingreso=F.ing;
+  let P=st.pesos||0, I=st.inv||0, D=st.deuda||0, U=st.usd||0, L=1, factor=1;
   const base=F.gastos, baseSinCon=F.gastos-F.congreso;
   const mv=Math.round(c.mesVenta||0);
-  const rows=[{m:0,L:1,ingreso,gastos:base,P,I,D,usd:U*fx,neto:P+I+U*fx-D}];
+  const k=Math.max(0,Math.min(12,Math.round(p.mesesMalos||0)));
+  const cada=k>0?Math.max(1,Math.round(12/k)):0;
+  const rows=[{m:0,L:1,ingreso:F.ing,gastos:base,P,I,D,usd:U*fx,neto:P+I+U*fx-D,malo:false}];
   for(let m=1;m<=H;m++){
     L*=1+pi;
-    if(p.cadaMeses>0&&m%p.cadaMeses===0)ingreso*=1+(p.ajuste||0)/100;
+    if(p.cadaMeses>0&&m%p.cadaMeses===0)factor*=1+(p.ajuste||0)/100;
+    const malo=cada>0&&(m-1)%cada===0;
+    const ingreso=(malo?F.ingMin:F.ing)*factor;
     const vendido=mv>0&&m>=mv;
     if(mv>0&&m===mv)U+=c.valorUsd||0;
     const gastos=(vendido?baseSinCon:base)*L;
@@ -492,9 +501,9 @@ function simular(F){
     if(bal>=0){const pago=Math.min(D,bal);D-=pago;bal-=pago;const ah=bal*(p.ahorroAuto||0)/100;I+=ah;P+=bal-ah;}
     else{P+=bal;if(P<0){I+=P;P=0;if(I<0){D-=I;I=0;}}}
     const usd=U*fx*L;
-    rows.push({m,L,ingreso,gastos,P,I,D,usd,neto:P+I+usd-D});
+    rows.push({m,L,ingreso,gastos,P,I,D,usd,neto:P+I+usd-D,malo});
   }
-  return rows.map(r=>({m:r.m,ingreso:r.ingreso/r.L,gastos:r.gastos/r.L,P:r.P/r.L,I:r.I/r.L,D:r.D/r.L,usd:r.usd/r.L,neto:r.neto/r.L}));
+  return rows.map(r=>({m:r.m,malo:r.malo,ingreso:r.ingreso/r.L,gastos:r.gastos/r.L,P:r.P/r.L,I:r.I/r.L,D:r.D/r.L,usd:r.usd/r.L,neto:r.neto/r.L}));
 }
 
 /* ---------- outputs ---------- */
@@ -515,6 +524,7 @@ function renderTiles(F,sim){
     {k:'Ingresos',v:money(F.ing),d:'flujo de entrada'},
     {k:'Gastos',v:money(F.gastos),d:`${money(F.fijo)} fijos · ${money(F.variable)} variables`+(F.faltan?` · faltan ${F.faltan} montos`:'')},
     {k:'Balance mensual',v:money(F.balance),d:F.ing?`tasa de ahorro ${pct(tasa)}`:'cargá ingresos',cls:F.balance<0?'neg':F.balance>0?'pos':''},
+    ...(F.ingMin<F.ing?[{k:'Balance en mes malo',v:money(F.balanceMin),d:`con ingreso de ${M(F.ingMin)}`,cls:F.balanceMin<0?'neg':'pos'}]:[]),
     {k:'Colchón',v:colchon==null?'—':nf1.format(colchon)+' meses',d:'líquido ÷ gastos del mes'},
     {k:'Patrimonio neto hoy',v:M(neto0),d:'pesos + USD + inversiones − deuda'},
     {k:`Patrimonio real en ${sim.length-1} meses`,v:M(netoH),d:neto0?`${netoH>=neto0?'+':''}${pct(100*(netoH-neto0)/Math.abs(neto0))} en pesos de hoy`:'parte de cero',cls:netoH<neto0?'neg':netoH>neto0?'pos':''}
@@ -524,7 +534,7 @@ function renderTiles(F,sim){
 function renderDiagram(F,sim){
   const st=S.stocks;
   const liq=(st.pesos||0);
-  $('d-ing').textContent=M(F.ing)+' / mes';
+  $('d-ing').textContent=M(F.ing)+' / mes'+(F.ingMin<F.ing?` (mín ${M(F.ingMin)})`:'');
   $('d-gas').textContent=M(F.gastos)+' / mes';
   $('d-pesos').textContent=M(liq);
   $('d-colchon').textContent=F.gastos>0?nf1.format(liq/F.gastos)+' meses de gasto':'';
@@ -588,7 +598,7 @@ function renderChart(sim){
     const rect=svg.getBoundingClientRect();const px=(ev.clientX-rect.left)*W/rect.width;
     const m=Math.max(0,Math.min(n,Math.round((px-pl)/(W-pl-pr)*n)));const r=sim[m];
     xh.setAttribute('x1',x(m));xh.setAttribute('x2',x(m));xh.setAttribute('opacity','1');
-    tip.innerHTML=`<b>${m===0?'hoy':'mes '+m}</b><br>`+ser.map(s=>`<span style="color:${s.c}">●</span> ${esc(s.name)}: ${M(r[s.key])}`).join('<br>')+`<br>ingreso ${M(r.ingreso)} · gastos ${M(r.gastos)}`;
+    tip.innerHTML=`<b>${m===0?'hoy':'mes '+m}${r.malo?' · mes malo':''}</b><br>`+ser.map(s=>`<span style="color:${s.c}">●</span> ${esc(s.name)}: ${M(r[s.key])}`).join('<br>')+`<br>ingreso ${M(r.ingreso)} · gastos ${M(r.gastos)}`;
     tip.style.display='block';
     const wr=wrap.getBoundingClientRect();let tx=ev.clientX-wr.left+14, ty=ev.clientY-wr.top-10;
     if(tx+tip.offsetWidth>wr.width-8)tx=ev.clientX-wr.left-tip.offsetWidth-14;
@@ -601,7 +611,7 @@ function renderChart(sim){
 }
 function niceStep(raw){if(raw<=0)return 1;const p=Math.pow(10,Math.floor(Math.log10(raw)));const f=raw/p;return (f<=1?1:f<=2?2:f<=5?5:10)*p;}
 function renderTable(sim){
-  $('tbl').innerHTML=`<table><thead><tr><th>Mes</th><th>Ingreso</th><th>Gastos</th><th>Pesos</th><th>Inversiones</th><th>USD en $</th><th>Deuda</th><th>Neto</th></tr></thead><tbody>${sim.map(r=>`<tr><td>${r.m}</td><td>${nf.format(Math.round(r.ingreso))}</td><td>${nf.format(Math.round(r.gastos))}</td><td>${nf.format(Math.round(r.P))}</td><td>${nf.format(Math.round(r.I))}</td><td>${nf.format(Math.round(r.usd))}</td><td>${nf.format(Math.round(r.D))}</td><td>${nf.format(Math.round(r.neto))}</td></tr>`).join('')}</tbody></table>`;
+  $('tbl').innerHTML=`<table><thead><tr><th>Mes</th><th>Ingreso</th><th>Gastos</th><th>Pesos</th><th>Inversiones</th><th>USD en $</th><th>Deuda</th><th>Neto</th></tr></thead><tbody>${sim.map(r=>`<tr><td>${r.m}${r.malo?' ·':''}</td><td>${nf.format(Math.round(r.ingreso))}</td><td>${nf.format(Math.round(r.gastos))}</td><td>${nf.format(Math.round(r.P))}</td><td>${nf.format(Math.round(r.I))}</td><td>${nf.format(Math.round(r.usd))}</td><td>${nf.format(Math.round(r.D))}</td><td>${nf.format(Math.round(r.neto))}</td></tr>`).join('')}</tbody></table>`;
 }
 
 /* systemic reading */
@@ -621,6 +631,13 @@ function renderCards(F,sim){
     if(F.balance<0){add('bucle de refuerzo','critico','Flujo neto negativo',`Gastás ${M(-F.balance)} más de lo que entra por mes. Sin colchón, el déficit va a la tarjeta y el interés lo agranda: un bucle vicioso que se acelera solo.`+prov,3);on.add(3);}
     else if(tasa<10){add('bucle de balance','atencion','Tasa de ahorro baja',`Ahorrás ${pct(tasa)} del ingreso. El bucle virtuoso del interés compuesto existe pero es débil; un shock chico lo invierte.`+prov,3);on.add(3);}
     else add('bucle de refuerzo','ok','Hay sobrante',`Ahorrás ${pct(tasa)} del ingreso: ${M(F.balance)} por mes alimentan los stocks. La pregunta es adónde van.`+prov);
+  }
+  if(F.ingMin<F.ing&&F.gastos>0){
+    const gap=F.gastos-F.ingMin;
+    if(gap>0){
+      const aguanta=liq/gap;
+      add('buffer',aguanta<2?'critico':aguanta<4?'atencion':'ok','Ingreso variable: el colchón se mide en meses malos',`Un mes malo deja un déficit de ${M(gap)}. Con ${M(liq)} líquidos aguantás ${nf1.format(aguanta)} meses malos seguidos. El buffer no se dimensiona por el gasto sino por la brecha entre el gasto y el peor ingreso: ese es el tamaño que necesita.`,2);on.add(2);
+    }else add('buffer','ok','Cubrís los gastos hasta en un mes malo',`Con ${M(F.ingMin)} de ingreso mínimo te sobran ${M(-gap)}. La variabilidad del negocio no llega a tus gastos; el colchón solo tiene que cubrir imprevistos.`);
   }
   if(colchon!=null){
     if(colchon<1){add('buffer','critico','Sin colchón',`Tenés ${nf1.format(colchon)} meses de gasto en líquido. Cualquier imprevisto cae directo en deuda. El buffer es la segunda palanca de Meadows y acá está vacía.`,2);on.add(2);}
