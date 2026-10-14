@@ -141,7 +141,8 @@ footer p{margin:4px 0}
       <div class="fields">
         <div class="field"><label for="st-pesos">Pesos líquidos</label><input type="number" id="st-pesos" data-path="stocks.pesos" step="10000" placeholder="0"><span class="hint">cuenta, efectivo, billetera</span></div>
         <div class="field"><label for="st-usd">Dólares (USD)</label><input type="number" id="st-usd" data-path="stocks.usd" step="100" placeholder="0"><span class="hint">billete o cuenta</span></div>
-        <div class="field"><label for="st-fx">Tipo de cambio ($ por USD)</label><input type="number" id="st-fx" data-path="stocks.fx" step="10" placeholder="0"></div>
+        <div class="field"><label for="st-fxTipo">Dólar de referencia</label><select id="st-fxTipo" data-path="stocks.fxTipo"><option value="oficial">Oficial (venta)</option><option value="bolsa">MEP (venta)</option><option value="blue">Blue (venta)</option><option value="manual">Manual</option></select><span class="hint">se actualiza al abrir desde dolarapi.com</span></div>
+        <div class="field"><label for="st-fx">Tipo de cambio ($ por USD)</label><input type="number" id="st-fx" data-path="stocks.fx" step="10" placeholder="0"><span class="hint" id="fx-hint"></span></div>
         <div class="field"><label for="st-inv">Inversiones ($)</label><input type="number" id="st-inv" data-path="stocks.inv" step="10000" placeholder="0"><span class="hint">plazo fijo, FCI, cedears</span></div>
         <div class="field"><label for="st-invTasa">Rendimiento inversión (% mensual)</label><input type="number" id="st-invTasa" data-path="stocks.invTasa" step="0.1"></div>
         <div class="field"><label for="st-deuda">Deuda de tarjeta ($)</label><input type="number" id="st-deuda" data-path="stocks.deuda" step="10000" placeholder="0"><span class="hint">saldo financiado, no el resumen</span></div>
@@ -313,7 +314,7 @@ const DEF={
     {id:'g19',nombre:'Vacaciones (anual ÷ 12)',monto:null,tipo:'variable',grupo:'ocio'},
     {id:'g20',nombre:'Transporte',monto:null,tipo:'variable',grupo:'transporte'}
   ],
-  stocks:{pesos:null,usd:null,fx:null,inv:null,invTasa:3,deuda:null,deudaTasa:8},
+  stocks:{pesos:null,usd:null,fx:1535,fxTipo:'oficial',fxFecha:'2026-10-13T18:00:00.000Z',inv:null,invTasa:3,deuda:null,deudaTasa:8},
   congreso:{valorUsd:null,mesVenta:0},
   params:{inflacion:1.9,horizonte:24,ajuste:10,cadaMeses:6,ahorroAuto:0,meta:''}
 };
@@ -368,6 +369,8 @@ document.addEventListener('input',e=>{
   const el=e.target;
   if(el.dataset.path){
     setPath(el.dataset.path, el.type==='number'?num(el.value):el.value);
+    if(el.dataset.path==='stocks.fxTipo'){fxUI();actualizarFx();}
+    if(el.dataset.path==='stocks.fx'){S.stocks.fxFecha=null;fxUI();}
   }else if(el.dataset.list){
     const r=S[el.dataset.list].find(x=>x.id===el.dataset.id);if(!r)return;
     const f=el.dataset.field;
@@ -594,6 +597,31 @@ function renderCards(F,sim){
   document.querySelectorAll('#palancas li').forEach(li=>li.classList.toggle('on',on.has(+li.dataset.p)));
 }
 
+/* ---------- tipo de cambio ---------- */
+const FX_NOMBRE={oficial:'oficial',bolsa:'MEP',blue:'blue'};
+function fxUI(){
+  const st=S.stocks, manual=st.fxTipo==='manual';
+  $('st-fx').readOnly=!manual;
+  const f=st.fxFecha?new Date(st.fxFecha):null;
+  const cuando=f&&!isNaN(f)?f.toLocaleString('es-AR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):null;
+  $('fx-hint').textContent=manual?'valor cargado a mano':(cuando?`dólar ${FX_NOMBRE[st.fxTipo]||st.fxTipo} · dolarapi.com · ${cuando}`:'sin cotización todavía');
+}
+async function actualizarFx(){
+  const tipo=S.stocks.fxTipo;if(!FX_NOMBRE[tipo])return;
+  try{
+    const r=await fetch('https://dolarapi.com/v1/dolares/'+tipo,{cache:'no-store'});
+    if(!r.ok)throw new Error(r.status);
+    const j=await r.json();const v=Number(j.venta);if(!(v>0))throw new Error('sin venta');
+    const cambio=S.stocks.fx!==v||S.stocks.fxFecha!==j.fechaActualizacion;
+    S.stocks.fx=v;S.stocks.fxFecha=j.fechaActualizacion||new Date().toISOString();
+    $('st-fx').value=v;fxUI();compute();
+    if(cambio){dirty=true;scheduleSave();}
+  }catch(e){
+    fxUI();
+    if(S.stocks.fx)$('fx-hint').textContent+=' · no se pudo actualizar, queda el último valor';
+  }
+}
+
 /* ---------- persistence ---------- */
 function setStatus(t){$('status').textContent=t}
 function scheduleSave(){clearTimeout(saveT);saveT=setTimeout(save,700);}
@@ -613,12 +641,12 @@ async function initDb(){
     if(!db){setStatus('Guardado en este navegador');return;}
     DB=db;
     const snap=await db.doc('finanzas/modelo').get();
-    if(snap.exists&&!dirty){S=merge(DEF,snap.data());renderRows();renderFields();compute();}
+    if(snap.exists&&!dirty){S=merge(DEF,snap.data());renderRows();renderFields();fxUI();compute();}
     setStatus(snap.exists?'Sincronizado':'Los cambios se guardan solos');
   }catch(e){setStatus('Guardado en este navegador');}
 }
 
-loadLocal();renderRows();renderFields();compute();setStatus('Los cambios se guardan solos');initDb();
+loadLocal();renderRows();renderFields();fxUI();compute();setStatus('Los cambios se guardan solos');initDb().then(actualizarFx);
 })();
 </script>
 </body>
