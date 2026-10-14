@@ -51,6 +51,7 @@ section{display:grid;gap:14px}
 .rows{display:grid;gap:6px}
 .row{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(110px,.9fr) minmax(0,.9fr) 28px;gap:6px;align-items:center}
 .row.ing{grid-template-columns:minmax(0,1.6fr) minmax(110px,.9fr) 28px}
+.row.cat{grid-template-columns:minmax(0,1fr) 28px}
 .row-head{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
 .row-head span{min-width:0}
 input,select{font:inherit;color:var(--fg);background:var(--surface-2);border:1px solid var(--line);border-radius:4px;padding:6px 8px;min-width:0;width:100%}
@@ -184,8 +185,20 @@ footer p{margin:4px 0}
       <div class="fields">
         <div class="field"><label for="c-valorUsd">Valor de venta estimado (USD)</label><input type="number" id="c-valorUsd" data-path="congreso.valorUsd" step="1000" placeholder="0"></div>
         <div class="field"><label for="c-mesVenta">Mes estimado de venta</label><input type="number" id="c-mesVenta" data-path="congreso.mesVenta" step="1" min="0"><span class="hint">0 = sin fecha (no se vende en el horizonte)</span></div>
+        <div class="field"><label for="c-grupo">Categoría que drena el depto</label><select id="c-grupo" data-path="congreso.grupo"></select><span class="hint">esos gastos se cortan al vender</span></div>
       </div>
       <div class="subtotal"><span>Drenaje mensual del depto</span><b id="t-congreso"></b></div>
+    </div>
+  </div>
+  <div class="panel">
+    <h2>Categorías <small>agrupan los gastos</small></h2>
+    <div class="grid2">
+      <div>
+        <p style="margin:0 0 8px;color:var(--fg2);font-size:14px">Renombrá, agregá o quitá. Al quitar una, sus gastos pasan a "otro".</p>
+        <div class="rows" id="cats"></div>
+        <button class="add" data-addcat>+ agregar categoría</button>
+      </div>
+      <div class="tbl" id="cat-tot"></div>
     </div>
   </div>
 </section>
@@ -289,8 +302,8 @@ footer p{margin:4px 0}
 (function(){
 'use strict';
 const KEY='finanzas-sistema-v1';
-const GRUPOS=['vivienda','congreso','salud','ocio','servicios','proyectos','consumo','transporte','otro'];
 const DEF={
+  grupos:['vivienda','congreso','talleres','deporte','ocio','salud','servicios','proyectos','consumo','transporte','otro'],
   ingresos:[{id:'i1',nombre:'Ingreso principal',monto:3000000}],
   gastos:[
     {id:'g1',nombre:'Alquiler depto Retiro',monto:null,tipo:'fijo',grupo:'vivienda'},
@@ -300,8 +313,9 @@ const DEF={
     {id:'g5',nombre:'Luz y agua Retiro',monto:null,tipo:'fijo',grupo:'vivienda'},
     {id:'g6',nombre:'Luz y agua Congreso',monto:null,tipo:'fijo',grupo:'congreso'},
     {id:'g7',nombre:'Gas Retiro',monto:null,tipo:'fijo',grupo:'vivienda'},
-    {id:'g8',nombre:'Talleres (acuarela y carpintería)',monto:null,tipo:'fijo',grupo:'ocio'},
-    {id:'g9',nombre:'Fútbol (2 por semana)',monto:null,tipo:'fijo',grupo:'ocio'},
+    {id:'g8',nombre:'Acuarela',monto:null,tipo:'fijo',grupo:'talleres'},
+    {id:'g8b',nombre:'Carpintería',monto:null,tipo:'fijo',grupo:'talleres'},
+    {id:'g9',nombre:'Fútbol (2 por semana)',monto:null,tipo:'fijo',grupo:'deporte'},
     {id:'g10',nombre:'Obra social',monto:null,tipo:'fijo',grupo:'salud'},
     {id:'g11',nombre:'Telefonía',monto:null,tipo:'fijo',grupo:'servicios'},
     {id:'g12',nombre:'Claude',monto:null,tipo:'fijo',grupo:'servicios'},
@@ -315,7 +329,7 @@ const DEF={
     {id:'g20',nombre:'Transporte',monto:null,tipo:'variable',grupo:'transporte'}
   ],
   stocks:{pesos:null,usd:null,fx:1535,fxTipo:'oficial',fxFecha:'2026-10-13T18:00:00.000Z',inv:null,invTasa:3,deuda:null,deudaTasa:8},
-  congreso:{valorUsd:null,mesVenta:0},
+  congreso:{valorUsd:null,mesVenta:0,grupo:'congreso'},
   params:{inflacion:1.9,horizonte:24,ajuste:10,cadaMeses:6,ahorroAuto:0,meta:''}
 };
 let S=structuredClone(DEF), DB=null, dirty=false, saveT=null, saving=false, pending=false;
@@ -335,7 +349,10 @@ function merge(base,saved){
   const out=structuredClone(base);
   if(Array.isArray(saved.ingresos))out.ingresos=saved.ingresos;
   if(Array.isArray(saved.gastos))out.gastos=saved.gastos;
+  if(Array.isArray(saved.grupos)&&saved.grupos.length)out.grupos=saved.grupos.map(String);
   for(const k of ['stocks','congreso','params'])if(saved[k]&&typeof saved[k]==='object')Object.assign(out[k],saved[k]);
+  for(const g of out.gastos){if(!g.grupo)g.grupo=out.grupos[0];if(!out.grupos.includes(g.grupo))out.grupos.push(g.grupo);}
+  if(!out.grupos.includes(out.congreso.grupo))out.congreso.grupo=out.grupos[0];
   return out;
 }
 
@@ -348,13 +365,29 @@ function rowHtml(list,r){
   return `<div class="row" data-id="${r.id}">
     <input type="text" id="${r.id}-nombre" data-list="gastos" data-id="${r.id}" data-field="nombre" value="${esc(r.nombre)}" placeholder="concepto">
     <input type="number" id="${r.id}-monto" class="${r.monto==null?'faltante':''}" data-list="gastos" data-id="${r.id}" data-field="monto" value="${r.monto??''}" step="1000" placeholder="0">
-    <select id="${r.id}-grupo" data-list="gastos" data-id="${r.id}" data-field="grupo">${GRUPOS.map(g=>`<option value="${g}"${g===r.grupo?' selected':''}>${g}</option>`).join('')}</select>
+    <select id="${r.id}-grupo" data-list="gastos" data-id="${r.id}" data-field="grupo">${S.grupos.map(g=>`<option value="${esc(g)}"${g===r.grupo?' selected':''}>${esc(g)}</option>`).join('')}</select>
     <button class="del" data-del="gastos" data-id="${r.id}" title="quitar" aria-label="quitar">×</button></div>`;
 }
 function renderRows(){
   $('ingresos').innerHTML=S.ingresos.map(r=>rowHtml('ingresos',r)).join('');
   $('gastos-fijo').innerHTML=S.gastos.filter(g=>g.tipo==='fijo').map(r=>rowHtml('gastos',r)).join('');
   $('gastos-variable').innerHTML=S.gastos.filter(g=>g.tipo==='variable').map(r=>rowHtml('gastos',r)).join('');
+}
+function renderCats(){
+  $('cats').innerHTML=S.grupos.map(g=>`<div class="row cat"><input type="text" data-cat="${esc(g)}" value="${esc(g)}" aria-label="nombre de categoría"><button class="del" data-delcat="${esc(g)}" title="quitar" aria-label="quitar">×</button></div>`).join('');
+  const sel=$('c-grupo');sel.innerHTML=S.grupos.map(g=>`<option value="${esc(g)}"${g===S.congreso.grupo?' selected':''}>${esc(g)}</option>`).join('');
+}
+function renderCatTotals(F){
+  const rows=S.grupos.map(g=>({g,v:F.porGrupo[g]||0})).sort((a,b)=>b.v-a.v);
+  $('cat-tot').innerHTML=`<table><thead><tr><th>Categoría</th><th>$ / mes</th><th>% ingreso</th><th>% gasto</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(r.g)}</td><td>${nf.format(Math.round(r.v))}</td><td>${F.ing?pct(100*r.v/F.ing):'—'}</td><td>${F.gastos?pct(100*r.v/F.gastos):'—'}</td></tr>`).join('')}</tbody></table>`;
+}
+function renameCat(old,nu){
+  nu=(nu||'').trim();
+  if(!nu||nu===old||S.grupos.includes(nu))return false;
+  S.grupos[S.grupos.indexOf(old)]=nu;
+  for(const g of S.gastos)if(g.grupo===old)g.grupo=nu;
+  if(S.congreso.grupo===old)S.congreso.grupo=nu;
+  return true;
 }
 function renderFields(){
   document.querySelectorAll('[data-path]').forEach(el=>{
@@ -379,9 +412,25 @@ document.addEventListener('input',e=>{
   }else return;
   dirty=true;compute();scheduleSave();
 });
+document.addEventListener('change',e=>{
+  const el=e.target;if(el.dataset.cat==null)return;
+  if(renameCat(el.dataset.cat,el.value)){renderRows();renderCats();dirty=true;compute();scheduleSave();}
+  else el.value=el.dataset.cat;
+});
 document.addEventListener('click',e=>{
   const b=e.target.closest('button');if(!b)return;
-  if(b.dataset.add){
+  if(b.dataset.addcat!=null){
+    let n='nueva categoría',i=2;while(S.grupos.includes(n))n='nueva categoría '+(i++);
+    S.grupos.push(n);renderRows();renderCats();
+    const el=document.querySelector(`#cats input[data-cat="${n}"]`);if(el){el.focus();el.select();}
+  }else if(b.dataset.delcat!=null){
+    if(S.grupos.length<=1)return;
+    const g=b.dataset.delcat;S.grupos.splice(S.grupos.indexOf(g),1);
+    const dest=S.grupos.includes('otro')?'otro':S.grupos[0];
+    for(const x of S.gastos)if(x.grupo===g)x.grupo=dest;
+    if(S.congreso.grupo===g)S.congreso.grupo=dest;
+    renderRows();renderCats();
+  }else if(b.dataset.add){
     const id=(b.dataset.add==='ingresos'?'i':'g')+Date.now().toString(36);
     if(b.dataset.add==='ingresos')S.ingresos.push({id,nombre:'',monto:null});
     else S.gastos.push({id,nombre:'',monto:null,tipo:b.dataset.tipo,grupo:'otro'});
@@ -402,7 +451,7 @@ function flujos(){
   const porGrupo={};for(const x of g)porGrupo[x.grupo]=(porGrupo[x.grupo]||0)+(x.monto||0);
   const gastos=fijo+variable;
   const faltan=g.filter(x=>x.monto==null).length;
-  return {ing,fijo,variable,gastos,porGrupo,faltan,balance:ing-gastos,congreso:porGrupo.congreso||0,vivienda:porGrupo.vivienda||0};
+  return {ing,fijo,variable,gastos,porGrupo,faltan,balance:ing-gastos,congreso:porGrupo[S.congreso.grupo]||0,vivienda:porGrupo.vivienda||0};
 }
 function simular(F){
   const p=S.params, st=S.stocks, c=S.congreso;
@@ -435,7 +484,7 @@ function compute(){
   $('t-fijo').textContent=money(F.fijo);
   $('t-var').textContent=money(F.variable);
   $('t-congreso').textContent=money(F.congreso)+(F.ing?' · '+pct(100*F.congreso/F.ing)+' del ingreso':'');
-  renderTiles(F,sim);renderDiagram(F,sim);renderChart(sim);renderTable(sim);renderCards(F,sim);
+  renderCatTotals(F);renderTiles(F,sim);renderDiagram(F,sim);renderChart(sim);renderTable(sim);renderCards(F,sim);
 }
 function renderTiles(F,sim){
   const liq=(S.stocks.pesos||0)+(S.stocks.usd||0)*(S.stocks.fx||0);
@@ -641,12 +690,12 @@ async function initDb(){
     if(!db){setStatus('Guardado en este navegador');return;}
     DB=db;
     const snap=await db.doc('finanzas/modelo').get();
-    if(snap.exists&&!dirty){S=merge(DEF,snap.data());renderRows();renderFields();fxUI();compute();}
+    if(snap.exists&&!dirty){S=merge(DEF,snap.data());renderRows();renderCats();renderFields();fxUI();compute();}
     setStatus(snap.exists?'Sincronizado':'Los cambios se guardan solos');
   }catch(e){setStatus('Guardado en este navegador');}
 }
 
-loadLocal();renderRows();renderFields();fxUI();compute();setStatus('Los cambios se guardan solos');initDb().then(actualizarFx);
+loadLocal();renderRows();renderCats();renderFields();fxUI();compute();setStatus('Los cambios se guardan solos');initDb().then(actualizarFx);
 })();
 </script>
 </body>
